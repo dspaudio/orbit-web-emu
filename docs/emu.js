@@ -362,17 +362,30 @@ function safeInsets() {
 }
 function fitDevice() {
     const W = DEV.w * S, H = DEV.h * S;
-    /* visualViewport is the reliable size on iOS standalone launches, where
-       innerWidth/Height can be stale for a while after the icon is tapped */
+    /* the true viewport: visualViewport beats innerWidth/Height on iOS
+       (stale after home-screen launches), and in standalone mode the web
+       view covers the physical screen, so screen.width/height — oriented
+       to match — is the authoritative size (iOS under-reports the viewport
+       there by the status-bar strip) */
     const vv = window.visualViewport;
-    const vw = vv ? vv.width : window.innerWidth;
-    const vh = vv ? vv.height : window.innerHeight;
-    /* fit inside the safe area: clear of the Dynamic Island / status bar and
-       the home indicator, and centered between them */
-    const si = safeInsets();
-    const aw = vw - si.l - si.r, ah = vh - si.t - si.b;
-    const sFlat = Math.min(aw / W, ah / H);        // uniform, as-is
-    const sRot = Math.min(aw / H, ah / W);         // uniform, rotated 90°
+    let vw = Math.max(vv ? vv.width : 0, window.innerWidth);
+    let vh = Math.max(vv ? vv.height : 0, window.innerHeight);
+    const standalone = window.navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches;
+    if (standalone && window.screen) {
+        const big = Math.max(screen.width, screen.height);
+        const small = Math.min(screen.width, screen.height);
+        if (vh >= vw) {                            // portrait
+            vw = Math.max(vw, small);
+            vh = Math.max(vh, big);
+        } else {
+            vw = Math.max(vw, big);
+            vh = Math.max(vh, small);
+        }
+    }
+    const sFlat = Math.min(vw / W, vh / H);        // uniform, as-is
+    const sRot = Math.min(vw / H, vh / W);         // uniform, rotated 90°
     if (sFlat >= 1) {                              // fits at full size: normal page
         document.body.classList.remove('compact');
         device.style.transform = '';
@@ -382,13 +395,13 @@ function fitDevice() {
         return;
     }
     document.body.classList.add('compact');
-    device.style.left = (si.l + aw / 2) + 'px';    // the safe rect's center
-    device.style.top = (si.t + ah / 2) + 'px';
-    const rotate = ah > aw && sRot > sFlat;        // portrait, and rotating helps
+    device.style.left = (vw / 2) + 'px';
+    device.style.top = (vh / 2) + 'px';
+    const rotate = vh > vw && sRot > sFlat;        // portrait, and rotating helps
     if (rotate)                                    // local X spans screen height
-        device.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${ah / W}, ${aw / H})`;
+        device.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${vh / W}, ${vw / H})`;
     else
-        device.style.transform = `translate(-50%, -50%) scale(${aw / W}, ${ah / H})`;
+        device.style.transform = `translate(-50%, -50%) scale(${vw / W}, ${vh / H})`;
     deviceRotated = rotate;
     document.body.classList.toggle('rotated', rotate);
 }
