@@ -1,5 +1,7 @@
 # SLOOP web emulator
 
+**Play it: https://sabliran.github.io/sloop-web-emu/**
+
 A browser emulator of the [SLOOP](https://github.com/isod89/sloop-fm1) groovebox
 firmware for the M-VAVE FM-1 — in the spirit of groove-os.com/emu, but running
 SLOOP. The **unmodified firmware sources** (GPL-3.0, by Leo Kuroshita /
