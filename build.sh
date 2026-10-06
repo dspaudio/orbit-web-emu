@@ -17,5 +17,6 @@ clang --target=wasm32 -O2 -fno-builtin -ffreestanding -nostdlib \
     -Wl,--no-entry -Wl,--export-memory \
     -Wl,-z,stack-size=1048576 -Wl,--global-base=1048576 \
     -o dist/sloop.wasm src/sloop_wasm.c
-cp web/index.html web/emu.js web/worklet.js dist/
+cp web/index.html web/emu.js web/worklet.js web/manifest.webmanifest \
+   web/icon-192.png web/icon-512.png web/apple-touch-icon.png dist/
 ls -la dist/

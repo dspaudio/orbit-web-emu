@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>SLOOP — FM-1 emulator</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#101114">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SLOOP">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root {
     --txt: #c9cdd4;
@@ -132,6 +139,27 @@ body.compact #device { position: fixed; left: 50%; top: 50%; }
 #fs:active { background: rgba(52, 56, 63, .85); }
 body.compact.fs-ok #fs { display: flex; }
 
+/* iOS tip overlay (no Fullscreen API on iPhone → Add to Home Screen) */
+#fstip {
+    position: fixed; inset: 0; z-index: 30; display: none;
+    align-items: center; justify-content: center; padding: 24px;
+    background: rgba(8, 9, 11, .88); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+#fstip.show { display: flex; }
+#fstip .card {
+    max-width: 320px; text-align: center; line-height: 1.6;
+    background: #1c1f24; border: 1px solid #000; border-radius: 16px;
+    padding: 24px 22px; box-shadow: 0 16px 40px rgba(0,0,0,.6);
+}
+#fstip h2 { font-size: 15px; letter-spacing: 2px; color: var(--txt); font-weight: normal; margin-bottom: 12px; }
+#fstip p { font-size: 13px; color: var(--dim); }
+#fstip b { color: var(--accent); font-weight: normal; }
+#fstip .ok {
+    margin-top: 18px; display: inline-block; padding: 9px 22px; cursor: pointer;
+    font-size: 12px; letter-spacing: 1px; color: var(--txt);
+    background: #2a2e34; border: 1px solid #000; border-radius: 9px;
+}
+
 #help { max-width: 1200px; margin-top: 18px; font-size: 11px; color: var(--dim); line-height: 1.7; text-align: center; }
 #help b { color: var(--txt); font-weight: normal; }
 #help a { color: var(--accent); }
@@ -141,6 +169,12 @@ body.compact.fs-ok #fs { display: flex; }
 <h1><b>SLOOP</b> 2.3 &middot; M-VAVE FM-1 &middot; browser emulator</h1>
 
 <button id="fs" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
+
+<div id="fstip"><div class="card">
+    <h2>FULLSCREEN</h2>
+    <p>iPhone browsers can't go fullscreen from a button. For the full-screen app, tap the <b>Share</b> icon, then <b>Add to Home Screen</b> — SLOOP opens with no browser bars.</p>
+    <span class="ok">GOT IT</span>
+</div></div>
 
 <div id="device">
     <div id="power"><div class="ring">&#x23FB;</div><span>POWER ON</span><small>runs the real SLOOP firmware, compiled to WebAssembly &middot; sound on</small></div>

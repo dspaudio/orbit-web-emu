@@ -354,21 +354,33 @@ window.addEventListener('resize', fitDevice);
 window.addEventListener('orientationchange', () => setTimeout(fitDevice, 100));
 
 /* ------------------------------------------------- fullscreen toggle --- */
-/* A corner button on phones (hidden where the Fullscreen API is absent,
-   e.g. iOS Safari, which instead offers Add to Home Screen). */
+/* A corner button on phones. Where the Fullscreen API exists (Android
+   Chrome) it toggles true fullscreen. On iPhone, where WebKit has no page
+   fullscreen, it shows how to Add to Home Screen instead — and once the
+   page is launched that way (standalone), the button is hidden since it is
+   already chrome-free. */
 (function () {
     const fsBtn = document.getElementById('fs');
+    const tip = document.getElementById('fstip');
     const root = document.documentElement;
     const req = root.requestFullscreen || root.webkitRequestFullscreen;
     const exit = document.exitFullscreen || document.webkitExitFullscreen;
     const current = () => document.fullscreenElement || document.webkitFullscreenElement;
-    if (!req) return;                              // unsupported: leave the button hidden
-    document.body.classList.add('fs-ok');
+    const standalone = window.navigator.standalone === true ||
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.matchMedia('(display-mode: fullscreen)').matches;
+    if (standalone) return;                        // already chrome-free: no button needed
+    document.body.classList.add('fs-ok');          // show the corner button in compact mode
     const sync = () => { fsBtn.innerHTML = current() ? '&#x2715;' : '&#x26F6;'; setTimeout(fitDevice, 50); };
     fsBtn.addEventListener('click', () => {
-        if (current()) exit.call(document);
-        else req.call(root).catch(() => {});
+        if (req) {                                 // real fullscreen (Android etc.)
+            if (current()) exit.call(document);
+            else req.call(root).catch(() => {});
+        } else {                                    // iPhone: explain Add to Home Screen
+            tip.classList.add('show');
+        }
     });
+    tip.addEventListener('click', () => tip.classList.remove('show'));
     document.addEventListener('fullscreenchange', sync);
     document.addEventListener('webkitfullscreenchange', sync);
 })();
