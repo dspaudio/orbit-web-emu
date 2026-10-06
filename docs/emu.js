@@ -377,6 +377,7 @@ function fitDevice() {
     else
         device.style.transform = `translate(-50%, -50%) scale(${vw / W}, ${vh / H})`;
     deviceRotated = rotate;
+    document.body.classList.toggle('rotated', rotate);
 }
 window.addEventListener('resize', fitDevice);
 window.addEventListener('orientationchange', () => setTimeout(fitDevice, 100));

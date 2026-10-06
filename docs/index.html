@@ -152,14 +152,22 @@ body.compact.fs-ok #fs { display: flex; }
     padding: 11px 14px; font-size: 11px; letter-spacing: 2px; color: var(--dim);
 }
 #fw span.on { color: var(--accent); background: rgba(14, 15, 18, .8); }
-/* phones: keep clear of the rotated device's keybed — the pill sits in
-   the bottom right corner */
+/* phones, landscape: top right beside the fullscreen button */
 body.compact #fw {
-    left: auto; top: auto;
-    right: calc(env(safe-area-inset-right, 0px) + 10px);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+    left: auto; bottom: auto;
+    right: calc(env(safe-area-inset-right, 0px) + 62px);
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
 }
 body.compact #fw span { padding: 8px 10px; font-size: 10px; }
+/* phones, portrait (device rotated 90°): the pill rotates with it and sits
+   in the empty case strip along the right edge, beside the LCD — over no
+   control, and reading upright when the phone is held sideways */
+body.compact.rotated #fw {
+    top: 32%; bottom: auto; left: auto;
+    right: env(safe-area-inset-right, 0px);
+    transform: translateX(calc(50% - 15px)) rotate(90deg);
+    opacity: .94;
+}
 
 /* iOS tip overlay (no Fullscreen API on iPhone → Add to Home Screen) */
 #fstip {
