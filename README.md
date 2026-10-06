@@ -2,19 +2,27 @@
 
 **Play it: https://sabliran.github.io/sloop-web-emu/**
 
-A browser emulator of the [SLOOP](https://github.com/isod89/sloop-fm1) groovebox
-firmware for the M-VAVE FM-1 — in the spirit of groove-os.com/emu, but running
-SLOOP. The **unmodified firmware sources** (GPL-3.0, by Leo Kuroshita /
-Hügelton Instruments, SLOOP by isod89) are compiled to WebAssembly with a
-browser HAL in place of the FM-1 hardware. No synth re-implementation: the
-sound, sequencer, screens, layers and LEDs are the firmware's own code.
+A browser emulator of the M-VAVE FM-1 running custom firmware — in the
+spirit of groove-os.com/emu. It ships **two firmwares**, switchable from the
+top-left corner of the page:
+
+- [SLOOP](https://github.com/isod89/sloop-fm1) — the four-track groovebox
+- [Felucca](https://github.com/hugelton/Felucca) — its upstream, the
+  multi-engine synth by Leo Kuroshita / Hügelton Instruments
+
+The **unmodified firmware sources** (both GPL-3.0) are compiled to
+WebAssembly with a browser HAL in place of the FM-1 hardware. No synth
+re-implementation: the sound, sequencer, screens, layers and LEDs are the
+firmware's own code. Each firmware keeps its own local flash image, so saves
+survive both reloads and firmware switches.
 
 ## How it works
 
 ```
-src/sloop_wasm.c        the web "felucca.c": a browser HAL (time, input, ADC,
-                        an ST7789 panel model, audio stubs) + the firmware
-                        sources included in the same order as on hardware
+src/sloop_wasm.c        the web unity root for SLOOP: a browser HAL (time,
+                        input, ADC, an ST7789 panel model, audio stubs) + the
+                        firmware sources in the same order as on hardware
+src/felucca_wasm.c      the same for Felucca (hugelton/Felucca)
 web/worklet.js          the wasm runs INSIDE an AudioWorklet: process() pulls
                         mix_block() for glitch-free audio; a UI frame runs
                         every ~17 ms and posts framebuffer + LED state out

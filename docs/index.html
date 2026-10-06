@@ -139,6 +139,20 @@ body.compact #device { position: fixed; left: 50%; top: 50%; }
 #fs:active { background: rgba(52, 56, 63, .85); }
 body.compact.fs-ok #fs { display: flex; }
 
+/* firmware switcher — top-left corner, always available */
+#fw {
+    position: fixed; z-index: 20; display: flex; gap: 0; overflow: hidden;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    left: calc(env(safe-area-inset-left, 0px) + 10px);
+    background: rgba(32, 35, 40, .72); border: 1px solid rgba(0,0,0,.6);
+    border-radius: 11px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0,0,0,.45); cursor: pointer;
+}
+#fw span {
+    padding: 11px 14px; font-size: 11px; letter-spacing: 2px; color: var(--dim);
+}
+#fw span.on { color: var(--accent); background: rgba(14, 15, 18, .8); }
+
 /* iOS tip overlay (no Fullscreen API on iPhone → Add to Home Screen) */
 #fstip {
     position: fixed; inset: 0; z-index: 30; display: none;
@@ -166,9 +180,11 @@ body.compact.fs-ok #fs { display: flex; }
 </style>
 </head>
 <body>
-<h1><b>SLOOP</b> 2.3 &middot; M-VAVE FM-1 &middot; browser emulator</h1>
+<h1 id="title"><b>SLOOP</b> 2.3 &middot; M-VAVE FM-1 &middot; browser emulator</h1>
 
 <button id="fs" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
+
+<div id="fw" title="Switch firmware"><span data-fw="sloop">SLOOP</span><span data-fw="felucca">FELUCCA</span></div>
 
 <div id="fstip"><div class="card">
     <h2>FULLSCREEN</h2>
@@ -185,7 +201,7 @@ body.compact.fs-ok #fs { display: flex; }
     <b>1&ndash;0</b> FX SEL ENV LFO EDIT GLO HOME SAVE ARP SEQ &middot; <b>Space</b> PLAY &middot; <b>R</b> REC &middot;
     <b>&uarr;&darr;</b> SELECT &middot; <b>&larr;&rarr;</b> ALGORITHM &middot; <b>[ \</b> PRESETS &middot;
     knobs: drag or scroll (MASTER too) &middot; hold a function button to use its layer &middot; MIDI in supported<br>
-    <a href="https://github.com/isod89/sloop-fm1" target="_blank" rel="noopener">SLOOP firmware</a> (GPL-3.0) by Leo Kuroshita / isod89 &middot; emulator runs the unmodified firmware sources in an AudioWorklet &middot; your work saves locally in this browser (autosave, 4 projects, user presets)
+    firmware switcher top-left: <a href="https://github.com/isod89/sloop-fm1" target="_blank" rel="noopener">SLOOP</a> or <a href="https://github.com/hugelton/Felucca" target="_blank" rel="noopener">Felucca</a> (both GPL-3.0, by Leo Kuroshita / Hügelton Instruments; SLOOP by isod89) &middot; emulator runs the unmodified firmware sources in an AudioWorklet &middot; your work saves locally in this browser, per firmware (autosave, projects, user presets)
 </div>
 
 <script src="emu.js"></script>

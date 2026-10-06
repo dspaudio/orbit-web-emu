@@ -10,6 +10,24 @@
 const S = 1.25;                          // px per drawing unit
 const DEV = { w: 963, h: 588 };
 
+/* ---- firmware selection (SLOOP or its upstream, Felucca) ----
+ * Same hardware, same faceplate; only the wasm differs. The choice is kept
+ * in localStorage and each firmware has its own flash image in IndexedDB. */
+const FW = (localStorage.getItem('fw') === 'felucca') ? 'felucca' : 'sloop';
+document.querySelectorAll('#fw span').forEach(s => {
+    s.classList.toggle('on', s.dataset.fw === FW);
+});
+document.getElementById('fw').addEventListener('click', () => {
+    localStorage.setItem('fw', FW === 'sloop' ? 'felucca' : 'sloop');
+    location.reload();
+});
+document.getElementById('title').innerHTML = FW === 'felucca'
+    ? '<b>FELUCCA</b> &middot; M-VAVE FM-1 &middot; browser emulator'
+    : '<b>SLOOP</b> 2.3 &middot; M-VAVE FM-1 &middot; browser emulator';
+document.title = (FW === 'felucca' ? 'Felucca' : 'SLOOP') + ' — FM-1 emulator';
+document.querySelector('#power small').textContent =
+    'runs the real ' + (FW === 'felucca' ? 'Felucca' : 'SLOOP') + ' firmware, compiled to WebAssembly · sound on';
+
 /* ---- panel mapping (firmware/src/panel.c PANEL_DEFAULT) ----
  * label order: FX SCL ENV LFO EDIT GLO HOME SAVE ARP SEQ PLAY REC OCT- OCT+ */
 const BTN = { 'OCT-': 0, 'OCT+': 1, FX: 2, SCL: 3, ENV: 4, LFO: 5, EDIT: 6, GLO: 7,
@@ -267,20 +285,23 @@ function idb() {
         r.onerror = () => rej(r.error);
     });
 }
+const FLASH_KEY = 'image-' + FW;
 async function loadFlash() {
     try {
         const db = await idb();
-        return await new Promise(res => {
-            const q = db.transaction('flash').objectStore('flash').get('image');
+        const get = key => new Promise(res => {
+            const q = db.transaction('flash').objectStore('flash').get(key);
             q.onsuccess = () => res(q.result || null);
             q.onerror = () => res(null);
         });
+        return (await get(FLASH_KEY)) ||
+               (FW === 'sloop' ? await get('image') : null);   // pre-switcher saves
     } catch (e) { return null; }
 }
 async function saveFlash(buf) {
     try {
         const db = await idb();
-        db.transaction('flash', 'readwrite').objectStore('flash').put(buf, 'image');
+        db.transaction('flash', 'readwrite').objectStore('flash').put(buf, FLASH_KEY);
     } catch (e) {}
 }
 
@@ -290,7 +311,7 @@ async function powerOn() {
     ctx = new AudioContext({ sampleRate: 44100, latencyHint: 'interactive' });
     await ctx.audioWorklet.addModule('worklet.js');
     const [wasmBytes, flashImage] = await Promise.all([
-        (await fetch('sloop.wasm')).arrayBuffer(),
+        (await fetch(FW + '.wasm')).arrayBuffer(),
         loadFlash(),
     ]);
     node = new AudioWorkletNode(ctx, 'sloop', {
