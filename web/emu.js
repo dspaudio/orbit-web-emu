@@ -353,6 +353,26 @@ function fitDevice() {
 window.addEventListener('resize', fitDevice);
 window.addEventListener('orientationchange', () => setTimeout(fitDevice, 100));
 
+/* ------------------------------------------------- fullscreen toggle --- */
+/* A corner button on phones (hidden where the Fullscreen API is absent,
+   e.g. iOS Safari, which instead offers Add to Home Screen). */
+(function () {
+    const fsBtn = document.getElementById('fs');
+    const root = document.documentElement;
+    const req = root.requestFullscreen || root.webkitRequestFullscreen;
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    const current = () => document.fullscreenElement || document.webkitFullscreenElement;
+    if (!req) return;                              // unsupported: leave the button hidden
+    document.body.classList.add('fs-ok');
+    const sync = () => { fsBtn.innerHTML = current() ? '&#x2715;' : '&#x26F6;'; setTimeout(fitDevice, 50); };
+    fsBtn.addEventListener('click', () => {
+        if (current()) exit.call(document);
+        else req.call(root).catch(() => {});
+    });
+    document.addEventListener('fullscreenchange', sync);
+    document.addEventListener('webkitfullscreenchange', sync);
+})();
+
 buildKnobs();
 buildButtons();
 buildKeyboard();
