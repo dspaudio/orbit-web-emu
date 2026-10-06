@@ -384,8 +384,14 @@ function fitDevice() {
             vh = Math.max(vh, small);
         }
     }
-    const sFlat = Math.min(vw / W, vh / H);        // uniform, as-is
-    const sRot = Math.min(vw / H, vh / W);         // uniform, rotated 90°
+    /* the fit rectangle: clear of the Dynamic Island / status bar (and a
+       side notch in landscape), but flush with the bottom edge — the home
+       indicator floats translucently over the keys */
+    const si = safeInsets();
+    const ax = si.l, ay = si.t;
+    const aw = vw - si.l - si.r, ah = vh - si.t;
+    const sFlat = Math.min(aw / W, ah / H);        // uniform, as-is
+    const sRot = Math.min(aw / H, ah / W);         // uniform, rotated 90°
     if (sFlat >= 1) {                              // fits at full size: normal page
         document.body.classList.remove('compact');
         device.style.transform = '';
@@ -395,13 +401,13 @@ function fitDevice() {
         return;
     }
     document.body.classList.add('compact');
-    device.style.left = (vw / 2) + 'px';
-    device.style.top = (vh / 2) + 'px';
-    const rotate = vh > vw && sRot > sFlat;        // portrait, and rotating helps
+    device.style.left = (ax + aw / 2) + 'px';
+    device.style.top = (ay + ah / 2) + 'px';
+    const rotate = ah > aw && sRot > sFlat;        // portrait, and rotating helps
     if (rotate)                                    // local X spans screen height
-        device.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${vh / W}, ${vw / H})`;
+        device.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${ah / W}, ${aw / H})`;
     else
-        device.style.transform = `translate(-50%, -50%) scale(${vw / W}, ${vh / H})`;
+        device.style.transform = `translate(-50%, -50%) scale(${aw / W}, ${ah / H})`;
     deviceRotated = rotate;
     document.body.classList.toggle('rotated', rotate);
 }
