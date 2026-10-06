@@ -357,7 +357,11 @@ function initMidi() {
 let deviceRotated = false;
 function fitDevice() {
     const W = DEV.w * S, H = DEV.h * S;
-    const vw = window.innerWidth, vh = window.innerHeight;
+    /* visualViewport is the reliable size on iOS standalone launches, where
+       innerWidth/Height can be stale for a while after the icon is tapped */
+    const vv = window.visualViewport;
+    const vw = vv ? vv.width : window.innerWidth;
+    const vh = vv ? vv.height : window.innerHeight;
     const sFlat = Math.min(vw / W, vh / H);        // uniform, as-is
     const sRot = Math.min(vw / H, vh / W);         // uniform, rotated 90°
     if (sFlat >= 1) {                              // fits at full size: normal page
@@ -376,6 +380,13 @@ function fitDevice() {
 }
 window.addEventListener('resize', fitDevice);
 window.addEventListener('orientationchange', () => setTimeout(fitDevice, 100));
+if (window.visualViewport)
+    window.visualViewport.addEventListener('resize', fitDevice);
+/* iOS standalone (home-screen) launches settle their viewport late and may
+   never fire resize: re-fit a few times after load, and on return visits */
+window.addEventListener('pageshow', () => setTimeout(fitDevice, 50));
+for (const t of [150, 500, 1200, 2500])
+    setTimeout(fitDevice, t);
 
 /* ------------------------------------------------- fullscreen toggle --- */
 /* A corner button on phones. Where the Fullscreen API exists (Android
