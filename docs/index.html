@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>SLOOP — FM-1 emulator</title>
 <style>
 :root {
@@ -106,6 +106,12 @@ h1 b { color: var(--txt); }
     display: flex; align-items: center; justify-content: center; font-size: 30px; color: var(--accent);
 }
 
+/* compact mode (phones / small windows): the device is scaled — and in
+   portrait rotated 90° — to fill the viewport; emu.js sets the transform */
+body.compact { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+body.compact h1, body.compact #help { display: none; }
+body.compact #device { position: fixed; left: 50%; top: 50%; }
+
 #help { max-width: 1200px; margin-top: 18px; font-size: 11px; color: var(--dim); line-height: 1.7; text-align: center; }
 #help b { color: var(--txt); font-weight: normal; }
 #help a { color: var(--accent); }
@@ -123,7 +129,7 @@ h1 b { color: var(--txt); }
     <b>1&ndash;0</b> FX SEL ENV LFO EDIT GLO HOME SAVE ARP SEQ &middot; <b>Space</b> PLAY &middot; <b>R</b> REC &middot;
     <b>&uarr;&darr;</b> SELECT &middot; <b>&larr;&rarr;</b> ALGORITHM &middot; <b>[ \</b> PRESETS &middot;
     knobs: drag or scroll (MASTER too) &middot; hold a function button to use its layer &middot; MIDI in supported<br>
-    <a href="https://github.com/isod89/sloop-fm1" target="_blank" rel="noopener">SLOOP firmware</a> (GPL-3.0) by Leo Kuroshita / isod89 &middot; emulator runs the unmodified firmware sources in an AudioWorklet &middot; nothing is kept over a reload
+    <a href="https://github.com/isod89/sloop-fm1" target="_blank" rel="noopener">SLOOP firmware</a> (GPL-3.0) by Leo Kuroshita / isod89 &middot; emulator runs the unmodified firmware sources in an AudioWorklet &middot; your work saves locally in this browser (autosave, 4 projects, user presets)
 </div>
 
 <script src="emu.js"></script>

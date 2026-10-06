@@ -242,20 +242,52 @@ function applyLeds(leds, dims) {
     }
 }
 
+/* ----------------------------------------------------- local saves --- */
+/* The firmware's flash image lives in IndexedDB: restored before boot,
+ * written back whenever the firmware saves (autosave, projects, presets). */
+function idb() {
+    return new Promise((res, rej) => {
+        const r = indexedDB.open('sloop-emu', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('flash');
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+    });
+}
+async function loadFlash() {
+    try {
+        const db = await idb();
+        return await new Promise(res => {
+            const q = db.transaction('flash').objectStore('flash').get('image');
+            q.onsuccess = () => res(q.result || null);
+            q.onerror = () => res(null);
+        });
+    } catch (e) { return null; }
+}
+async function saveFlash(buf) {
+    try {
+        const db = await idb();
+        db.transaction('flash', 'readwrite').objectStore('flash').put(buf, 'image');
+    } catch (e) {}
+}
+
 /* ------------------------------------------------------------ power on --- */
 async function powerOn() {
     document.getElementById('power').remove();
     ctx = new AudioContext({ sampleRate: 44100, latencyHint: 'interactive' });
     await ctx.audioWorklet.addModule('worklet.js');
-    const wasmBytes = await (await fetch('sloop.wasm')).arrayBuffer();
+    const [wasmBytes, flashImage] = await Promise.all([
+        (await fetch('sloop.wasm')).arrayBuffer(),
+        loadFlash(),
+    ]);
     node = new AudioWorkletNode(ctx, 'sloop', {
         outputChannelCount: [2],
-        processorOptions: { wasmBytes },
+        processorOptions: { wasmBytes, flashImage },
     });
     node.port.onmessage = ev => {
         const m = ev.data;
         if (m.t === 'frame') { drawFB(m.fb); applyLeds(m.leds, m.dims); }
         else if (m.t === 'leds') applyLeds(m.leds, m.dims);
+        else if (m.t === 'flash') saveFlash(m.data);
     };
     node.connect(ctx.destination);
     await ctx.resume();
@@ -282,9 +314,31 @@ function initMidi() {
     }).catch(() => {});
 }
 
+/* ----------------------------------------------- fit small screens --- */
+/* Scale the device to the viewport; on a portrait phone, rotate it 90°
+   so the whole faceplate fills the screen. */
+function fitDevice() {
+    const W = DEV.w * S, H = DEV.h * S;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const sFlat = Math.min(vw / W, vh / H);        // as-is
+    const sRot = Math.min(vw / H, vh / W);         // rotated 90°
+    if (sFlat >= 1) {                              // fits at full size: normal page
+        document.body.classList.remove('compact');
+        device.style.transform = '';
+        return;
+    }
+    document.body.classList.add('compact');
+    const rotate = vh > vw && sRot > sFlat;        // portrait, and rotating helps
+    const k = (rotate ? sRot : sFlat) * 0.99;
+    device.style.transform = `translate(-50%, -50%) ${rotate ? 'rotate(90deg) ' : ''}scale(${k})`;
+}
+window.addEventListener('resize', fitDevice);
+window.addEventListener('orientationchange', () => setTimeout(fitDevice, 100));
+
 buildKnobs();
 buildButtons();
 buildKeyboard();
 const screenCanvas = buildScreen();
 c2d = screenCanvas.getContext('2d');
 img = c2d.createImageData(240, 240);
+fitDevice();

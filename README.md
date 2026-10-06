@@ -28,8 +28,10 @@ web/index.html          the device skin
 - Input goes straight into the debounced `fm1_in` state the firmware reads;
   encoder detents arrive as steps.
 - 44.1 kHz fixed-point DSP, as on the device. No floats anywhere.
-- Like the hardware with no flash: nothing is kept over a reload
-  (`FELUCCA_FLASH 0`; persistence via IndexedDB is a natural next step).
+- The FM-1's SPI flash is a RAM image synced to IndexedDB: autosave, the four
+  project slots, settings and user presets survive a reload, stored locally
+  in the user's browser (the firmware's own `storage.c` A/B sector scheme
+  runs unchanged on it).
 
 ## Build
 
@@ -59,15 +61,11 @@ cd dist && python3 -m http.server 8787
 
 ## Known gaps / next steps
 
-- No persistence yet: wire the firmware's flash API (`FELUCCA_FLASH 1` +
-  `storage.c`) to a RAM image synced to IndexedDB → projects, autosave and
-  user presets survive reloads, and the web-editor backup format works.
 - The HARDWARE CALIBRATION screen (hold OCT− + OCT+ at power-on) busy-waits
   on the key matrix and would stall the audio thread — don't enter it.
 - Audio capture/USB-audio, the SysEx web editor, and sample upload (CHOP) are
   stubbed out.
-- Faceplate is an approximation; measurements from the real device would make
-  a nicer skin.
+- On phones the device rotates and scales to fill the screen (portrait).
 
 ## License
 

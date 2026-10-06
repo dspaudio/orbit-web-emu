@@ -196,6 +196,16 @@ static void fm1_enter_uboot(void) {}
 #include "lcd.c"
 #include "gfx.c"
 #include "core.h"
+
+/* the flash image (declared before engines.c: eng_sample.c reads the user
+ * sample slots through SMP_USER_XIP, which on hardware is the memory-mapped
+ * XIP window — here it points into the same RAM image the storage uses) */
+#define EMU_FLASH_BASE 0x90000u
+#define EMU_FLASH_SIZE 0x70000u
+static uint8_t emu_flash[EMU_FLASH_SIZE];
+static volatile uint32_t emu_flash_gen;
+#define SMP_USER_XIP(k) (emu_flash + (SMP_USER_BASE - EMU_FLASH_BASE) + (k) * SMP_USER_SIZE)
+
 #include "engines.c"
 #include "drums.c"
 #include "params.c"
@@ -219,7 +229,44 @@ static void fm1_enter_uboot(void) {}
 #include "ui_layers.c"
 #include "ui_menu.c"
 #include "ui_input.c"
-#define FELUCCA_FLASH 0
+/* ---- flash: a RAM image of the FM-1's persisted areas ----
+ * storage.c's A/B sector scheme runs unchanged on this array; JS loads a
+ * saved image into it before boot and writes it back to IndexedDB whenever
+ * emu_flash_gen moves, so projects, autosave, settings and user presets
+ * survive a reload. Offsets are the real flash map (0x97000..0xFEFFF). */
+#define FELUCCA_FLASH 1
+static uint8_t flash_ok;
+#define FL_FAR(f) f
+static uint32_t fl_jedec_ram(void) { return 0x856014u; }   /* the expected part: flash_ok */
+static void fl_plain_window_init(void) {}
+static int emu_fl_ok(uint32_t off, uint32_t n)
+{
+    return off >= EMU_FLASH_BASE && n <= EMU_FLASH_SIZE && off - EMU_FLASH_BASE <= EMU_FLASH_SIZE - n;
+}
+static int st_read(uint32_t off, void *dst, uint32_t n)
+{
+    if (!emu_fl_ok(off, n))
+        return -8;
+    memcpy(dst, emu_flash + (off - EMU_FLASH_BASE), n);
+    return 0;
+}
+static int st_erase(uint32_t off)
+{
+    if (!emu_fl_ok(off, 4096u))
+        return -8;
+    memset(emu_flash + (off - EMU_FLASH_BASE), 0xFF, 4096u);
+    emu_flash_gen++;
+    return 0;
+}
+static int st_prog(uint32_t off, const void *src, uint32_t n)
+{
+    if (!emu_fl_ok(off, n))
+        return -8;
+    memcpy(emu_flash + (off - EMU_FLASH_BASE), src, n);
+    emu_flash_gen++;
+    return 0;
+}
+#include "storage.c"
 #include "upreset.c"
 #include "project.c"
 #include "splash.c"
@@ -344,3 +391,6 @@ WASM_EXPORT("emu_fb_gen") uint32_t emu_fb_gen_get(void) { return emu_fb_gen; }
 WASM_EXPORT("emu_audio_ptr") uint32_t emu_audio_ptr(void) { return (uint32_t)(uintptr_t)emu_audio_f; }
 WASM_EXPORT("emu_led_ptr") uint32_t emu_led_ptr(void) { return (uint32_t)(uintptr_t)fm1_led; }
 WASM_EXPORT("emu_led_dim_ptr") uint32_t emu_led_dim_ptr(void) { return (uint32_t)(uintptr_t)fm1_led_dim; }
+WASM_EXPORT("emu_flash_ptr") uint32_t emu_flash_ptr(void) { return (uint32_t)(uintptr_t)emu_flash; }
+WASM_EXPORT("emu_flash_size") uint32_t emu_flash_size(void) { return EMU_FLASH_SIZE; }
+WASM_EXPORT("emu_flash_gen") uint32_t emu_flash_gen_get(void) { return emu_flash_gen; }

@@ -7,7 +7,14 @@ class SloopProcessor extends AudioWorkletProcessor {
         super();
         const mod = new WebAssembly.Module(options.processorOptions.wasmBytes);
         this.e = new WebAssembly.Instance(mod, {}).exports;
+        const img = options.processorOptions.flashImage;
+        if (img && img.byteLength) {        // restore the saved flash before boot
+            const fl = new Uint8Array(this.e.memory.buffer, this.e.emu_flash_ptr(), this.e.emu_flash_size());
+            fl.set(new Uint8Array(img, 0, Math.min(img.byteLength, fl.length)));
+        }
+        this.lastFlashGen = 0;
         this.e.emu_init();
+        this.lastFlashGen = this.e.emu_flash_gen();   // boot-time writes need no save
         this.fbPtr = this.e.emu_fb_ptr();
         this.audioPtr = this.e.emu_audio_ptr();
         this.ledPtr = this.e.emu_led_ptr();
@@ -53,6 +60,14 @@ class SloopProcessor extends AudioWorkletProcessor {
         if (++this.blocks % 6 === 0) {       // a UI frame every ~17 ms
             this.e.emu_frame();
             this.postFrame();
+        }
+        if (this.blocks % 256 === 0) {       // ~0.75 s: ship changed flash to be saved
+            const gen = this.e.emu_flash_gen();
+            if (gen !== this.lastFlashGen) {
+                this.lastFlashGen = gen;
+                const fl = new Uint8Array(this.e.memory.buffer, this.e.emu_flash_ptr(), this.e.emu_flash_size()).slice();
+                this.port.postMessage({ t: 'flash', data: fl.buffer }, [fl.buffer]);
+            }
         }
         return this.running;
     }
