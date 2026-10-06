@@ -350,15 +350,16 @@ function initMidi() {
 }
 
 /* ----------------------------------------------- fit small screens --- */
-/* Scale the device to the viewport; on a portrait phone, rotate it 90°
-   so the whole faceplate fills the screen. deviceRotated tells knobDrag
-   which screen axis is the device's "up". */
+/* On phones and tablets the device fills the whole viewport, stretched
+   on each axis independently so there are no bars — any screen shape,
+   fullscreen included. In portrait it is rotated 90° first. deviceRotated
+   tells knobDrag which screen axis is the device's "up". */
 let deviceRotated = false;
 function fitDevice() {
     const W = DEV.w * S, H = DEV.h * S;
     const vw = window.innerWidth, vh = window.innerHeight;
-    const sFlat = Math.min(vw / W, vh / H);        // as-is
-    const sRot = Math.min(vw / H, vh / W);         // rotated 90°
+    const sFlat = Math.min(vw / W, vh / H);        // uniform, as-is
+    const sRot = Math.min(vw / H, vh / W);         // uniform, rotated 90°
     if (sFlat >= 1) {                              // fits at full size: normal page
         document.body.classList.remove('compact');
         device.style.transform = '';
@@ -367,8 +368,10 @@ function fitDevice() {
     }
     document.body.classList.add('compact');
     const rotate = vh > vw && sRot > sFlat;        // portrait, and rotating helps
-    const k = (rotate ? sRot : sFlat) * 0.99;
-    device.style.transform = `translate(-50%, -50%) ${rotate ? 'rotate(90deg) ' : ''}scale(${k})`;
+    if (rotate)                                    // local X spans screen height
+        device.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${vh / W}, ${vw / H})`;
+    else
+        device.style.transform = `translate(-50%, -50%) scale(${vw / W}, ${vh / H})`;
     deviceRotated = rotate;
 }
 window.addEventListener('resize', fitDevice);
