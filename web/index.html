@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLOOP — FM-1 emulator</title>
+<style>
+:root {
+    --panel: #1b1d21;
+    --panel2: #26292f;
+    --edge: #0d0e10;
+    --txt: #c9cdd4;
+    --dim: #70757d;
+    --accent: #e8b84b;
+    --k1: #4f8fe8; --k2: #46b96b; --k3: #e0c23e; --k4: #e08a3e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; }
+html, body { background: #101114; color: var(--txt); font-family: "Terminus (TTF)", "DejaVu Sans Mono", ui-monospace, monospace; }
+body { display: flex; flex-direction: column; align-items: center; padding: 18px 10px 40px; }
+
+h1 { font-size: 15px; letter-spacing: 3px; color: var(--dim); margin-bottom: 12px; font-weight: normal; }
+h1 b { color: var(--txt); }
+
+#device {
+    background: linear-gradient(175deg, #23262b, #191b1f 60%);
+    border: 1px solid #000;
+    border-radius: 18px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+    padding: 22px 24px 26px;
+    position: relative;
+}
+
+#top { display: flex; gap: 26px; align-items: flex-start; }
+
+#bezel {
+    background: #000; border-radius: 10px; padding: 12px;
+    border: 1px solid #000;
+    box-shadow: inset 0 0 12px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.05);
+}
+#screen { width: 420px; height: 420px; image-rendering: pixelated; display: block; background: #000; }
+
+#right { display: flex; flex-direction: column; gap: 18px; min-width: 330px; }
+
+.encrow { display: flex; gap: 20px; justify-content: space-between; }
+.enc { text-align: center; width: 70px; }
+.enc .cap {
+    width: 56px; height: 56px; margin: 0 auto 6px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #3a3e46, #15161a 75%);
+    border: 1px solid #000; position: relative; cursor: ns-resize;
+    box-shadow: 0 3px 8px rgba(0,0,0,.6), inset 0 1px 1px rgba(255,255,255,.1);
+    touch-action: none;
+}
+.enc .cap::after {
+    content: ""; position: absolute; left: 50%; top: 4px; width: 3px; height: 16px;
+    margin-left: -1.5px; border-radius: 2px; background: #cfd3da;
+    transform-origin: 50% 24px; transform: rotate(var(--rot, 0deg));
+}
+.enc.k1 .cap::after { background: var(--k1); }
+.enc.k2 .cap::after { background: var(--k2); }
+.enc.k3 .cap::after { background: var(--k3); }
+.enc.k4 .cap::after { background: var(--k4); }
+.enc label { font-size: 10px; color: var(--dim); letter-spacing: 1px; }
+
+#master { display: flex; align-items: center; gap: 10px; font-size: 10px; color: var(--dim); letter-spacing: 1px; }
+#master input { flex: 1; accent-color: var(--accent); }
+
+#btns { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 22px; }
+.btn {
+    padding: 11px 0 9px; text-align: center; font-size: 11px; letter-spacing: 1px;
+    background: linear-gradient(#32363d, #22252a);
+    border: 1px solid #000; border-radius: 7px; cursor: pointer; color: var(--txt);
+    box-shadow: 0 2px 4px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
+    position: relative; touch-action: none;
+}
+.btn:active, .btn.down { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.btn.lit { color: #fff; box-shadow: 0 0 14px 2px rgba(240,220,160,.45), inset 0 1px 0 rgba(255,255,255,.1); background: linear-gradient(#5a5341, #3c3831); }
+.btn.glow { box-shadow: 0 0 8px 0 rgba(240,220,160,.18); }
+.btn.transport { background: linear-gradient(#3a3020, #2a2318); color: var(--accent); }
+.btn kbd { position: absolute; top: 2px; right: 5px; font-size: 8px; color: var(--dim); }
+
+#kbd { position: relative; margin-top: 22px; height: 150px; }
+.wkey {
+    position: absolute; top: 0; width: 56px; height: 150px;
+    background: linear-gradient(#f2f0ea, #d8d5cc);
+    border: 1px solid #222; border-radius: 0 0 5px 5px; cursor: pointer; touch-action: none;
+}
+.wkey.down { background: linear-gradient(#cfcdc6, #bebbb2); }
+.wkey.lit { background: linear-gradient(#ffe9a8, #ecd188); box-shadow: 0 0 16px rgba(255,220,130,.6); }
+.wkey.glow { background: linear-gradient(#efe7cf, #d8d2bd); }
+.bkey {
+    position: absolute; top: 0; width: 34px; height: 92px; z-index: 2;
+    background: linear-gradient(#34373d, #0c0d0f);
+    border: 1px solid #000; border-radius: 0 0 4px 4px; cursor: pointer; touch-action: none;
+}
+.bkey.down { background: linear-gradient(#232529, #000); }
+.bkey.lit { background: linear-gradient(#8a7435, #5c4d20); box-shadow: 0 0 14px rgba(255,220,130,.55); }
+.bkey.glow { background: linear-gradient(#4a462f, #1c1a10); }
+.wkey i { position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: 9px; color: #888; font-style: normal; }
+
+#power {
+    position: absolute; inset: 0; z-index: 10; border-radius: 18px;
+    background: rgba(8,9,11,.93); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 18px; cursor: pointer;
+}
+#power span { font-size: 26px; letter-spacing: 8px; color: var(--txt); }
+#power small { color: var(--dim); font-size: 11px; letter-spacing: 1px; }
+#power .ring {
+    width: 74px; height: 74px; border-radius: 50%; border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 30px; color: var(--accent);
+}
+
+#help { max-width: 980px; margin-top: 18px; font-size: 11px; color: var(--dim); line-height: 1.7; text-align: center; }
+#help b { color: var(--txt); font-weight: normal; }
+#help a { color: var(--accent); }
+</style>
+</head>
+<body>
+<h1><b>SLOOP</b> 2.3 &middot; M-VAVE FM-1 &middot; browser emulator</h1>
+
+<div id="device">
+    <div id="power"><div class="ring">&#x23FB;</div><span>POWER ON</span><small>runs the real SLOOP firmware, compiled to WebAssembly &middot; sound on</small></div>
+    <div id="top">
+        <div id="bezel"><canvas id="screen" width="240" height="240"></canvas></div>
+        <div id="right">
+            <div class="encrow">
+                <div class="enc" data-enc="0"><div class="cap"></div><label>SELECT</label></div>
+                <div class="enc" data-enc="1"><div class="cap"></div><label>ALGORITHM</label></div>
+                <div class="enc" data-enc="6"><div class="cap"></div><label>PRESETS</label></div>
+            </div>
+            <div class="encrow">
+                <div class="enc k1" data-enc="2"><div class="cap"></div><label>KNOB 1</label></div>
+                <div class="enc k2" data-enc="3"><div class="cap"></div><label>KNOB 2</label></div>
+                <div class="enc k3" data-enc="4"><div class="cap"></div><label>KNOB 3</label></div>
+                <div class="enc k4" data-enc="5"><div class="cap"></div><label>KNOB 4</label></div>
+            </div>
+            <div id="master">VOL <input type="range" min="0" max="1023" value="820" id="vol"></div>
+            <div id="btns"></div>
+        </div>
+    </div>
+    <div id="kbd"></div>
+</div>
+
+<div id="help">
+    <b>keys:</b> middle row = white keys from C4, top row = black keys &middot; <b>Z/X</b> OCT&minus;/OCT+ &middot;
+    <b>1&ndash;0</b> FX SCL ENV LFO EDIT GLO HOME SAVE ARP SEQ &middot; <b>Space</b> PLAY &middot; <b>R</b> REC &middot;
+    <b>&uarr;&darr;</b> SELECT &middot; <b>&larr;&rarr;</b> ALGORITHM &middot; <b>[ ]</b> PRESETS &middot;
+    knobs: drag or scroll &middot; hold a function button to use its layer &middot; MIDI in supported<br>
+    <a href="https://github.com/isod89/sloop-fm1" target="_blank" rel="noopener">SLOOP firmware</a> (GPL-3.0) by Leo Kuroshita / isod89 &middot; emulator runs the unmodified firmware sources in an AudioWorklet &middot; nothing is kept over a reload
+</div>
+
+<script src="emu.js"></script>
+</body>
+</html>
