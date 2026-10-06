@@ -95,16 +95,30 @@ function label(text, x, y) {
 }
 
 function knobDrag(cap, turn) {           // shared drag/wheel handling
-    let dragY = null, acc = 0;
+    cap.appendChild(Object.assign(document.createElement('div'), { className: 'grab' }));
+    let last = null, acc = 0, touch = false;
+    /* Move the knob along the direction that reads as "up" on the device.
+       When the device is rotated 90° (portrait phones), its up points to the
+       right of the screen, so a horizontal drag turns the knob; otherwise a
+       vertical drag does. Touch gets a shorter throw for finer control. */
     cap.addEventListener('wheel', ev => { ev.preventDefault(); turn(ev.deltaY < 0 ? 1 : -1); }, { passive: false });
-    cap.addEventListener('pointerdown', ev => { ev.preventDefault(); dragY = ev.clientY; acc = 0; try { cap.setPointerCapture(ev.pointerId); } catch (e) {} });
-    cap.addEventListener('pointermove', ev => {
-        if (dragY === null) return;
-        acc += dragY - ev.clientY; dragY = ev.clientY;
-        const s = Math.trunc(acc / 10);
-        if (s) { acc -= s * 10; turn(s); }
+    cap.addEventListener('pointerdown', ev => {
+        ev.preventDefault();
+        touch = ev.pointerType !== 'mouse';
+        last = deviceRotated ? ev.clientX : ev.clientY;
+        acc = 0;
+        try { cap.setPointerCapture(ev.pointerId); } catch (e) {}
     });
-    const up = () => { dragY = null; };
+    cap.addEventListener('pointermove', ev => {
+        if (last === null) return;
+        const cur = deviceRotated ? ev.clientX : ev.clientY;
+        acc += deviceRotated ? (cur - last) : (last - cur);   // up / right = increase
+        last = cur;
+        const step = touch ? 14 : 9;                          // px per detent
+        const s = Math.trunc(acc / step);
+        if (s) { acc -= s * step; turn(s); }
+    });
+    const up = () => { last = null; };
     cap.addEventListener('pointerup', up);
     cap.addEventListener('pointercancel', up);
 }
@@ -316,7 +330,9 @@ function initMidi() {
 
 /* ----------------------------------------------- fit small screens --- */
 /* Scale the device to the viewport; on a portrait phone, rotate it 90°
-   so the whole faceplate fills the screen. */
+   so the whole faceplate fills the screen. deviceRotated tells knobDrag
+   which screen axis is the device's "up". */
+let deviceRotated = false;
 function fitDevice() {
     const W = DEV.w * S, H = DEV.h * S;
     const vw = window.innerWidth, vh = window.innerHeight;
@@ -325,12 +341,14 @@ function fitDevice() {
     if (sFlat >= 1) {                              // fits at full size: normal page
         document.body.classList.remove('compact');
         device.style.transform = '';
+        deviceRotated = false;
         return;
     }
     document.body.classList.add('compact');
     const rotate = vh > vw && sRot > sFlat;        // portrait, and rotating helps
     const k = (rotate ? sRot : sFlat) * 0.99;
     device.style.transform = `translate(-50%, -50%) ${rotate ? 'rotate(90deg) ' : ''}scale(${k})`;
+    deviceRotated = rotate;
 }
 window.addEventListener('resize', fitDevice);
 window.addEventListener('orientationchange', () => setTimeout(fitDevice, 100));
