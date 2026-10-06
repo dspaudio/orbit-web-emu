@@ -355,6 +355,11 @@ function initMidi() {
    fullscreen included. In portrait it is rotated 90° first. deviceRotated
    tells knobDrag which screen axis is the device's "up". */
 let deviceRotated = false;
+function safeInsets() {
+    const cs = getComputedStyle(document.documentElement);
+    const p = n => parseFloat(cs.getPropertyValue(n)) || 0;
+    return { t: p('--sat'), b: p('--sab'), l: p('--sal'), r: p('--sar') };
+}
 function fitDevice() {
     const W = DEV.w * S, H = DEV.h * S;
     /* visualViewport is the reliable size on iOS standalone launches, where
@@ -362,20 +367,28 @@ function fitDevice() {
     const vv = window.visualViewport;
     const vw = vv ? vv.width : window.innerWidth;
     const vh = vv ? vv.height : window.innerHeight;
-    const sFlat = Math.min(vw / W, vh / H);        // uniform, as-is
-    const sRot = Math.min(vw / H, vh / W);         // uniform, rotated 90°
+    /* fit inside the safe area: clear of the Dynamic Island / status bar and
+       the home indicator, and centered between them */
+    const si = safeInsets();
+    const aw = vw - si.l - si.r, ah = vh - si.t - si.b;
+    const sFlat = Math.min(aw / W, ah / H);        // uniform, as-is
+    const sRot = Math.min(aw / H, ah / W);         // uniform, rotated 90°
     if (sFlat >= 1) {                              // fits at full size: normal page
         document.body.classList.remove('compact');
         device.style.transform = '';
+        device.style.left = device.style.top = '';
         deviceRotated = false;
+        document.body.classList.remove('rotated');
         return;
     }
     document.body.classList.add('compact');
-    const rotate = vh > vw && sRot > sFlat;        // portrait, and rotating helps
+    device.style.left = (si.l + aw / 2) + 'px';    // the safe rect's center
+    device.style.top = (si.t + ah / 2) + 'px';
+    const rotate = ah > aw && sRot > sFlat;        // portrait, and rotating helps
     if (rotate)                                    // local X spans screen height
-        device.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${vh / W}, ${vw / H})`;
+        device.style.transform = `translate(-50%, -50%) rotate(90deg) scale(${ah / W}, ${aw / H})`;
     else
-        device.style.transform = `translate(-50%, -50%) scale(${vw / W}, ${vh / H})`;
+        device.style.transform = `translate(-50%, -50%) scale(${aw / W}, ${ah / H})`;
     deviceRotated = rotate;
     document.body.classList.toggle('rotated', rotate);
 }

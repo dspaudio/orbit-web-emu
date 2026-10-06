@@ -16,6 +16,11 @@
     --txt: #c9cdd4;
     --dim: #70757d;
     --accent: #e8b84b;
+    /* safe-area insets, readable from JS (fitDevice) */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-user-select: none; user-select: none; }
 html, body { background: #101114; color: var(--txt); font-family: "Terminus (TTF)", "DejaVu Sans Mono", ui-monospace, monospace; }
