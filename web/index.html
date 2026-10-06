@@ -152,6 +152,15 @@ body.compact.fs-ok #fs { display: flex; }
     padding: 11px 14px; font-size: 11px; letter-spacing: 2px; color: var(--dim);
 }
 #fw span.on { color: var(--accent); background: rgba(14, 15, 18, .8); }
+/* phones: keep the corner clear of the rotated device's keybed — the pill
+   moves to the top right, beside the fullscreen button */
+body.compact #fw {
+    left: auto;
+    right: calc(env(safe-area-inset-right, 0px) + 62px);
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+}
+body.compact #fw span { padding: 8px 10px; font-size: 10px; }
+body.compact:not(.fs-ok) #fw { right: calc(env(safe-area-inset-right, 0px) + 10px); }
 
 /* iOS tip overlay (no Fullscreen API on iPhone → Add to Home Screen) */
 #fstip {
