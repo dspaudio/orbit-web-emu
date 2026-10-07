@@ -398,8 +398,11 @@ function padMsg(d) {
 function initMidi() {
     if (!navigator.requestMIDIAccess) return;
     navigator.requestMIDIAccess({ sysex: false }).then(acc => {
-        const hook = () => acc.inputs.forEach(inp => {
+        const hook = () => {
+            let padSeen = false;
+            acc.inputs.forEach(inp => {
             const isPad = /arduino micro|pro micro/i.test(inp.name || '');
+            if (isPad) padSeen = true;
             inp.onmidimessage = ev => {
                 const d = ev.data;
                 if (!d || !d.length || d[0] >= 0xF0) return;
@@ -408,6 +411,9 @@ function initMidi() {
                 node.port.postMessage({ t: 'midi', p: pkt >>> 0 });
             };
         });
+            const pm = document.getElementById('padmap');
+            if (pm) pm.style.display = padSeen ? '' : 'none';
+        };
         hook();
         acc.onstatechange = hook;
     }).catch(() => {});
