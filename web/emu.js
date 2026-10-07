@@ -338,20 +338,20 @@ document.getElementById('power').addEventListener('click', powerOn, { once: true
 /* Generic MIDI gear is forwarded raw into the firmware's MIDI-in. The
    ProMicroPad (the DIY controller; shows up as "Arduino Micro") instead
    drives the faceplate itself:
-     knobs CC16-19 (relative)   KNOB1..4; with pad-SHIFT held:
-                                SELECT, ALGORITHM, PRESETS, MASTER pot
+     knobs CC16-19 (relative)   SELECT, ALGORITHM, PRESETS, MASTER pot;
+                                with pad-SHIFT held: KNOB1..4
      note 48 (back-left)        pad-SHIFT, local to this page
-     notes 49 50 51             PLAY REC SEQ        (shift: HOME SAVE ARP)
-     notes 52-63                keybed, chromatic from F3
-                                (shift: FX SCL ENV LFO EDIT GLO OCT- OCT+ ...) */
+     notes 49 50 51             OCT- OCT+ PLAY
+     notes 52-63                keybed, chromatic from F3; with shift:
+                                FX SCL ENV LFO / HOME SAVE ARP SEQ / EDIT GLO REC */
 let padShift = false;
-const PAD_ENC = { 16: 2, 17: 3, 18: 4, 19: 5 };             // KNOB1..4
-const PAD_ENC_S = { 16: 0, 17: 1, 18: 6, 19: -1 };          // SELECT ALGO PRESETS MASTER
-const PAD_FROW = { 49: BTN.PLAY, 50: BTN.REC, 51: BTN.SEQ };
-const PAD_FROW_S = { 49: BTN.HOME, 50: BTN.SAVE, 51: BTN.ARP };
+const PAD_ENC = { 16: 0, 17: 1, 18: 6, 19: -1 };            // SELECT ALGO PRESETS MASTER
+const PAD_ENC_S = { 16: 2, 17: 3, 18: 4, 19: 5 };           // shift: KNOB1..4
+const PAD_FROW = { 49: BTN['OCT-'], 50: BTN['OCT+'], 51: BTN.PLAY };
+const PAD_FROW_S = PAD_FROW;                                // same with shift
 const PAD_BTN_S = { 52: BTN.FX, 53: BTN.SCL, 54: BTN.ENV, 55: BTN.LFO,
-                    56: BTN.EDIT, 57: BTN.GLO, 58: BTN['OCT-'], 59: BTN['OCT+'],
-                    60: BTN.HOME, 61: BTN.SAVE, 62: BTN.ARP, 63: BTN.SEQ };
+                    56: BTN.HOME, 57: BTN.SAVE, 58: BTN.ARP, 59: BTN.SEQ,
+                    60: BTN.EDIT, 61: BTN.GLO, 62: BTN.REC };
 const padHeldBtns = {}, padHeldNotes = {};  // release matches press-time layer
 
 function padMsg(d) {
@@ -378,7 +378,10 @@ function padMsg(d) {
     const frow = padShift ? PAD_FROW_S[n] : PAD_FROW[n];
     if (frow !== undefined) { padHeldBtns[n] = frow; btnDown(frow); return; }
     if (n >= 52 && n <= 63) {
-        if (padShift) { const b = PAD_BTN_S[n]; padHeldBtns[n] = b; btnDown(b); }
+        if (padShift) {
+            const b = PAD_BTN_S[n];
+            if (b !== undefined) { padHeldBtns[n] = b; btnDown(b); }
+        }
         else { const id = n - 52; padHeldNotes[n] = id; notesMask |= 1 << id; sendInput(); }
     }
 }
