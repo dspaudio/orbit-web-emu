@@ -343,14 +343,14 @@ document.getElementById('power').addEventListener('click', powerOn, { once: true
 /* Generic MIDI gear is forwarded raw into the firmware's MIDI-in. The
    ProMicroPad (the DIY controller; shows up as "Arduino Micro") instead
    drives the faceplate itself:
-     knobs CC16-19 (relative)   SELECT, ALGORITHM, PRESETS, MASTER pot;
+     knobs CC16-19 (relative)   MASTER pot, SELECT, PRESETS, ALGORITHM;
                                 with pad-SHIFT held: KNOB1..4
      note 48 (back-left)        pad-SHIFT, local to this page
      notes 49 50 51             OCT- OCT+ PLAY
      notes 52-63                keybed, chromatic from F3; with shift:
                                 FX SCL ENV LFO / HOME SAVE ARP SEQ / EDIT GLO REC */
 let padShift = false;
-const PAD_ENC = { 16: 0, 17: 1, 18: 6, 19: -1 };            // SELECT ALGO PRESETS MASTER
+const PAD_ENC = { 16: -1, 17: 0, 18: 6, 19: 1 };            // MASTER SELECT PRESETS ALGO
 const PAD_ENC_S = { 16: 2, 17: 3, 18: 4, 19: 5 };           // shift: KNOB1..4
 const PAD_FROW = { 49: BTN['OCT-'], 50: BTN['OCT+'], 51: BTN.PLAY };
 const PAD_FROW_S = PAD_FROW;                                // same with shift
