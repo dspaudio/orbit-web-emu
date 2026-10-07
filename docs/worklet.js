@@ -22,9 +22,21 @@ class SloopProcessor extends AudioWorkletProcessor {
         this.lastGen = -1;
         this.blocks = 0;
         this.running = true;
+        this.inputNotes = 0;
+        this.inputButtons = 0;
+        this.requestedButtons = 0;
+        this.buttonQueue = [];
         this.port.onmessage = (ev) => {
             const m = ev.data;
-            if (m.t === 'input') this.e.emu_input(m.notes, m.buttons);
+            if (m.t === 'input') {
+                // Preserve short button taps across firmware UI frames.
+                this.inputNotes = m.notes;
+                if (m.buttons !== this.requestedButtons) {
+                    this.buttonQueue.push(m.buttons);
+                    this.requestedButtons = m.buttons;
+                }
+                this.e.emu_input(this.inputNotes, this.inputButtons);
+            }
             else if (m.t === 'enc') this.e.emu_enc(m.e, m.steps);
             else if (m.t === 'start') this.e.emu_start();
             else if (m.t === 'adc') this.e.emu_adc_set(m.ch, m.v);
@@ -58,6 +70,10 @@ class SloopProcessor extends AudioWorkletProcessor {
             R[i] = a[2 * i + 1];
         }
         if (++this.blocks % 6 === 0) {       // a UI frame every ~17 ms
+            if (this.buttonQueue.length) {
+                this.inputButtons = this.buttonQueue.shift();
+                this.e.emu_input(this.inputNotes, this.inputButtons);
+            }
             this.e.emu_frame();
             this.postFrame();
         }

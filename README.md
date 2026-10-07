@@ -24,10 +24,15 @@ git -C ../orbit checkout "$(cat ORBIT_REVISION)"
 python3 -m pip install -r ../orbit/requirements.txt
 ORBIT=../orbit ./build.sh
 node tests/orbit-wasm.mjs
+node tests/orbit-worklet.mjs
 cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-info.json docs/
 ```
 
 `ORBIT_REVISION` pins the published source revision. `build-info.json` records the checkout used for the build. The original comparison binaries are copied from the fork's `docs/` directory and are not rebuilt by this command.
+
+## Input corrections
+
+HOME now briefly displays the engine and actual loaded preset when PRESETS is turned. The preset bank selects individual sounds; all 68 factory mappings resolve. Short button presses are queued across firmware UI frames, so fast SAVE/EDIT/SEQ taps are recognised. The AudioWorklet regression test checks a rapid SAVE press/release followed by a preset detent.
 
 ## ORBIT controls
 
@@ -41,10 +46,10 @@ cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-in
 ## Validation and progress
 
 - ORBIT wasm32 build: PASS (clang 18.1.3 + lld).
-- WebAssembly smoke test: PASS; module size 1,057,590 bytes, no imports.
+- WebAssembly smoke test: PASS; module size 1,058,655 bytes, no imports.
 - Actual synth output: finite, non-silent PCM; observed peak 0.4307.
 - Flash: 458,752-byte image, 15 storage writes, restored image preserved across boot.
-- Browser UI/audio session: awaiting deployment verification.
+- Browser AudioWorklet boot and HOME rendering: verified on the published site.
 
 ![Actual ORBIT WebAssembly HOME framebuffer](docs/orbit-wasm-home.png)
 
