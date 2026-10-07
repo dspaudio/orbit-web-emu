@@ -82,6 +82,8 @@ const BLACK_IDS = [1, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25];
 let node = null, ctx = null;
 let notesMask = 0, buttonsMask = 0;
 let masterVal = 820;
+const encVis = {};                       // enc index -> visual-only cap rotate
+let masterVis = null;                    // master cap repaint
 
 function sendInput() { if (node) node.port.postMessage({ t: 'input', notes: notesMask, buttons: buttonsMask }); }
 function noteDown(n) { notesMask |= 1 << n; sendInput(); }
@@ -150,13 +152,16 @@ function buildKnobs() {
         const cap = el('cap', cx, cy, KNOB_D, KNOB_D);
         if (col) cap.style.setProperty('--pcol', KCOL[col]);
         let rot = 0;
-        knobDrag(cap, s => { rot += s * 18; cap.style.setProperty('--rot', rot + 'deg'); enc(e, s); });
+        const vis = s => { rot += s * 18; cap.style.setProperty('--rot', rot + 'deg'); };
+        encVis[e] = vis;
+        knobDrag(cap, s => { vis(s); enc(e, s); });
     }
     /* MASTER: a 300° pot read by the firmware's ADC */
     label('MASTER', MASTER.cx, MASTER.cy - 36);
     const cap = el('cap', MASTER.cx, MASTER.cy, KNOB_D, KNOB_D);
     cap.style.setProperty('--pcol', '#e8b84b');
     const show = () => cap.style.setProperty('--rot', (-150 + 300 * masterVal / 1023) + 'deg');
+    masterVis = show;
     show();
     knobDrag(cap, s => { masterVal = Math.max(0, Math.min(1023, masterVal + s * 32)); show(); sendMaster(); });
 }
@@ -362,7 +367,11 @@ function padMsg(d) {
         if (e === -1) {
             masterVal = Math.max(0, Math.min(1023, masterVal + delta * 24));
             sendMaster();
-        } else enc(e, delta);
+            if (masterVis) masterVis();
+        } else {
+            enc(e, delta);
+            if (encVis[e]) encVis[e](delta);
+        }
         return;
     }
     if (st !== 0x90 && st !== 0x80) return;
