@@ -335,13 +335,63 @@ async function powerOn() {
 document.getElementById('power').addEventListener('click', powerOn, { once: true });
 
 /* --------------------------------------------------------------- MIDI --- */
+/* Generic MIDI gear is forwarded raw into the firmware's MIDI-in. The
+   ProMicroPad (the DIY controller; shows up as "Arduino Micro") instead
+   drives the faceplate itself:
+     knobs CC16-19 (relative)   KNOB1..4; with pad-SHIFT held:
+                                SELECT, ALGORITHM, PRESETS, MASTER pot
+     note 48 (back-left)        pad-SHIFT, local to this page
+     notes 49 50 51             PLAY REC SEQ        (shift: HOME SAVE ARP)
+     notes 52-63                keybed, chromatic from F3
+                                (shift: FX SCL ENV LFO EDIT GLO OCT- OCT+ ...) */
+let padShift = false;
+const PAD_ENC = { 16: 2, 17: 3, 18: 4, 19: 5 };             // KNOB1..4
+const PAD_ENC_S = { 16: 0, 17: 1, 18: 6, 19: -1 };          // SELECT ALGO PRESETS MASTER
+const PAD_FROW = { 49: BTN.PLAY, 50: BTN.REC, 51: BTN.SEQ };
+const PAD_FROW_S = { 49: BTN.HOME, 50: BTN.SAVE, 51: BTN.ARP };
+const PAD_BTN_S = { 52: BTN.FX, 53: BTN.SCL, 54: BTN.ENV, 55: BTN.LFO,
+                    56: BTN.EDIT, 57: BTN.GLO, 58: BTN['OCT-'], 59: BTN['OCT+'],
+                    60: BTN.HOME, 61: BTN.SAVE, 62: BTN.ARP, 63: BTN.SEQ };
+const padHeldBtns = {}, padHeldNotes = {};  // release matches press-time layer
+
+function padMsg(d) {
+    const st = d[0] & 0xF0;
+    if (st === 0xB0 && PAD_ENC[d[1]] !== undefined) {
+        const delta = d[2] < 64 ? d[2] : d[2] - 128;
+        const e = padShift ? PAD_ENC_S[d[1]] : PAD_ENC[d[1]];
+        if (e === -1) {
+            masterVal = Math.max(0, Math.min(1023, masterVal + delta * 24));
+            sendMaster();
+        } else enc(e, delta);
+        return;
+    }
+    if (st !== 0x90 && st !== 0x80) return;
+    const n = d[1], on = st === 0x90 && d[2] > 0;
+    if (n === 48) { padShift = on; return; }
+    if (!on) {
+        if (padHeldBtns[n] !== undefined) { btnUp(padHeldBtns[n]); delete padHeldBtns[n]; }
+        if (padHeldNotes[n] !== undefined) {
+            notesMask &= ~(1 << padHeldNotes[n]); sendInput(); delete padHeldNotes[n];
+        }
+        return;
+    }
+    const frow = padShift ? PAD_FROW_S[n] : PAD_FROW[n];
+    if (frow !== undefined) { padHeldBtns[n] = frow; btnDown(frow); return; }
+    if (n >= 52 && n <= 63) {
+        if (padShift) { const b = PAD_BTN_S[n]; padHeldBtns[n] = b; btnDown(b); }
+        else { const id = n - 52; padHeldNotes[n] = id; notesMask |= 1 << id; sendInput(); }
+    }
+}
+
 function initMidi() {
     if (!navigator.requestMIDIAccess) return;
     navigator.requestMIDIAccess({ sysex: false }).then(acc => {
         const hook = () => acc.inputs.forEach(inp => {
+            const isPad = /arduino micro|pro micro/i.test(inp.name || '');
             inp.onmidimessage = ev => {
                 const d = ev.data;
                 if (!d || !d.length || d[0] >= 0xF0) return;
+                if (isPad) return padMsg(d);
                 const pkt = (d[0] >> 4) | (d[0] << 8) | ((d[1] || 0) << 16) | ((d[2] || 0) << 24);
                 node.port.postMessage({ t: 'midi', p: pkt >>> 0 });
             };
