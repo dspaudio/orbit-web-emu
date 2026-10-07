@@ -1,80 +1,61 @@
-# SLOOP web emulator
+# ORBIT web emulator
 
-**Play it: https://sabliran.github.io/sloop-web-emu/**
+A fork of [sabliran/sloop-web-emu](https://github.com/sabliran/sloop-web-emu) that runs the actual [ORBIT FM-1 firmware](https://github.com/dspaudio/orbit) as WebAssembly inside an AudioWorklet.
 
-A browser emulator of the M-VAVE FM-1 running custom firmware — in the
-spirit of groove-os.com/emu. It ships **two firmwares**, switchable from the
-top-left corner of the page:
+**ORBIT 0.2.1 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
 
-- [SLOOP](https://github.com/isod89/sloop-fm1) — the four-track groovebox
-- [Felucca](https://github.com/hugelton/Felucca) — its upstream, the
-  multi-engine synth by Leo Kuroshita / Hügelton Instruments
+## Run the compiled emulator
 
-The **unmodified firmware sources** (both GPL-3.0) are compiled to
-WebAssembly with a browser HAL in place of the FM-1 hardware. No synth
-re-implementation: the sound, sequencer, screens, layers and LEDs are the
-firmware's own code. Each firmware keeps its own local flash image, so saves
-survive both reloads and firmware switches.
-
-## How it works
-
-```
-src/sloop_wasm.c        the web unity root for SLOOP: a browser HAL (time,
-                        input, ADC, an ST7789 panel model, audio stubs) + the
-                        firmware sources in the same order as on hardware
-src/felucca_wasm.c      the same for Felucca (hugelton/Felucca)
-web/worklet.js          the wasm runs INSIDE an AudioWorklet: process() pulls
-                        mix_block() for glitch-free audio; a UI frame runs
-                        every ~17 ms and posts framebuffer + LED state out
-web/emu.js              faceplate: screen canvas, knobs, buttons, keybed,
-                        computer-keyboard + MIDI input, LED glow
-web/index.html          the device skin
-```
-
-- The LCD is emulated at the panel-protocol level (CASET/RASET/RAMWR), so the
-  firmware's own `lcd.c`/`gfx.c` draw every pixel.
-- Input goes straight into the debounced `fm1_in` state the firmware reads;
-  encoder detents arrive as steps.
-- 44.1 kHz fixed-point DSP, as on the device. No floats anywhere.
-- The FM-1's SPI flash is a RAM image synced to IndexedDB: autosave, the four
-  project slots, settings and user presets survive a reload, stored locally
-  in the user's browser (the firmware's own `storage.c` A/B sector scheme
-  runs unchanged on it).
-
-## Build
-
-Needs system `clang` + `lld` (wasm32 target — no emscripten), `python3`
-(+ numpy) for the firmware's generated tables, and the SLOOP sources:
+The `docs/` directory contains the compiled module and static application. Serve it locally:
 
 ```sh
-git clone https://github.com/isod89/sloop-fm1 ~/Projects/sloop-fm1
-cd ~/Projects/sloop-fm1 && mkdir -p build/gen
-for g in font icons tables samples drumkits logo; do
-    python3 tools/gen_$g.py build/gen/$( [ $g = logo ] && echo sloop_logo.h || echo felucca_$g.h ); done
-
-cd ~/Projects/sloop-web-emu
-./build.sh                  # SLOOP=/path/to/sloop-fm1 to override
-cd dist && python3 -m http.server 8787
-# open http://localhost:8787
+python3 -m http.server 8787 --directory docs
 ```
 
-## Controls
+Open http://localhost:8787 and press POWER to start audio. AudioWorklet requires HTTPS or localhost; opening the HTML file directly is insufficient.
 
-- middle keyboard row = white keys from C4, top row = black keys
-- `Z`/`X` OCT−/OCT+, `1`–`0` = FX SCL ENV LFO EDIT GLO HOME SAVE ARP SEQ,
-  `Space` PLAY, `R` REC, `↑↓` SELECT, `←→` ALGORITHM, `[` `\` PRESETS
-- knobs: mouse drag or scroll; buttons/keys: click or touch (multi-touch ok)
-- a connected MIDI keyboard plays in (channels as on hardware: 1–3 synths,
-  10 drums)
+## Rebuild ORBIT
 
-## Known gaps / next steps
+Requirements: clang + lld with wasm32 support, Python 3, numpy and Pillow. No Emscripten or FM-1 vendor SDK is needed for this browser build.
 
-- The HARDWARE CALIBRATION screen (hold OCT− + OCT+ at power-on) busy-waits
-  on the key matrix and would stall the audio thread — don't enter it.
-- Audio capture/USB-audio, the SysEx web editor, and sample upload (CHOP) are
-  stubbed out.
-- On phones the device rotates and scales to fill the screen (portrait).
+```sh
+git clone https://github.com/dspaudio/orbit ../orbit
+git -C ../orbit checkout "$(cat ORBIT_REVISION)"
+python3 -m pip install -r ../orbit/requirements.txt
+ORBIT=../orbit ./build.sh
+node tests/orbit-wasm.mjs
+cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-info.json docs/
+```
 
-## License
+`ORBIT_REVISION` pins the published source revision. `build-info.json` records the checkout used for the build. The original comparison binaries are copied from the fork's `docs/` directory and are not rebuilt by this command.
 
-GPL-3.0-only, as the firmware it embeds.
+## ORBIT controls
+
+- HOME: event Tape. KNOB1 sets the head; KNOB2/3 set the inclusive start/end; KNOB4 selects COPY or LIFT.
+- OCT−: copy/lift the selection. OCT+: drop at the head, overwriting existing events. ALGORITHM selects the track.
+- EDIT / ENV / GLO / SEQ: synth / envelope / mixer / step sequencer.
+- Click the keybed to play. PLAY and REC use the existing transport and live recording.
+- Computer keys: Z/X = OCT−/OCT+, 1–0 = FX/SCL/ENV/LFO/EDIT/GLO/HOME/SAVE/ARP/SEQ, Space = PLAY, R = REC, arrows = SELECT/ALGORITHM.
+- Knobs accept mouse drag or scroll. MIDI keyboard input uses the upstream emulator's mapping.
+
+## Validation and progress
+
+- ORBIT wasm32 build: PASS (clang 18.1.3 + lld).
+- WebAssembly smoke test: PASS; module size 1,057,590 bytes, no imports.
+- Actual synth output: finite, non-silent PCM; observed peak 0.4307.
+- Flash: 458,752-byte image, 15 storage writes, restored image preserved across boot.
+- Browser UI/audio session: awaiting deployment verification.
+
+![Actual ORBIT WebAssembly HOME framebuffer](docs/orbit-wasm-home.png)
+
+## Test scope and limitations
+
+The WebAssembly smoke test checks boot and framebuffer rendering, panel and encoder input, sequencer and editor screens, non-silent finite PCM, isolated autosave writes and reboot with a restored flash image. These checks run the compiled ORBIT C engine; they do not establish real FM-1 boot safety, memory budget or IRQ timing.
+
+Browser projects and settings save locally in IndexedDB. USB audio, SysEx/editor communication and user sample upload/CHOP are not implemented in the emulator HAL. Bluetooth pairing/audio is not implemented. Avoid the hardware calibration screen, which can stall the worklet. The divide-by-zero trap mitigation belongs to the hardware HAL and cannot be validated by this browser HAL.
+
+ORBIT Tape stores note and drum events, rather than long recorded PCM audio. See the [firmware README](https://github.com/dspaudio/orbit) for source screenshots, progress and hardware build instructions.
+
+## Origin and licensing
+
+The emulator is forked from `sabliran/sloop-web-emu` at `bbfd8e5b3bfc452520f61afb0d94e2fdfe93fd9d`; its history and notices are retained. The original README is preserved in [README-UPSTREAM.md](README-UPSTREAM.md). ORBIT derives from SLOOP/Felucca. Software is GPL-3.0-only; firmware asset notices remain in the linked source repository.

@@ -13,22 +13,23 @@ const DEV = { w: 963, h: 588 };
 /* ---- firmware selection (SLOOP or its upstream, Felucca) ----
  * Same hardware, same faceplate; only the wasm differs. The choice is kept
  * in localStorage and each firmware has its own flash image in IndexedDB. */
-const FW = (localStorage.getItem('fw') === 'felucca') ? 'felucca' : 'sloop';
+const FIRMWARES = ['orbit', 'sloop', 'felucca'];
+const savedFirmware = localStorage.getItem('orbit-emu-fw');
+const FW = FIRMWARES.includes(savedFirmware) ? savedFirmware : 'orbit';
 document.querySelectorAll('#fw span').forEach(s => {
     s.classList.toggle('on', s.dataset.fw === FW);
 });
-document.getElementById('fw').addEventListener('click', () => {
-    localStorage.setItem('fw', FW === 'sloop' ? 'felucca' : 'sloop');
+document.getElementById('fw').addEventListener('click', ev => {
+    const choice = ev.target.closest('[data-fw]');
+    if (!choice || choice.dataset.fw === FW) return;
+    localStorage.setItem('orbit-emu-fw', choice.dataset.fw);
     location.reload();
 });
-document.getElementById('title').innerHTML = FW === 'felucca'
-    ? '<b>FELUCCA</b> &middot; M-VAVE FM-1 &middot; browser emulator'
-    : '<b>SLOOP</b> 2.3 &middot; M-VAVE FM-1 &middot; browser emulator';
-document.title = (FW === 'felucca' ? 'Felucca' : 'SLOOP') + ' — FM-1 emulator';
-document.querySelector('#power small').textContent =
-    'runs the real ' + (FW === 'felucca' ? 'Felucca' : 'SLOOP') + ' firmware, compiled to WebAssembly · sound on';
-document.getElementById('man-sloop').style.display = FW === 'sloop' ? '' : 'none';
-document.getElementById('man-felucca').style.display = FW === 'felucca' ? '' : 'none';
+const firmwareLabel = {orbit: 'ORBIT 0.2.1', sloop: 'SLOOP', felucca: 'FELUCCA'}[FW];
+document.getElementById('title').innerHTML = '<b>' + firmwareLabel + '</b> · M-VAVE FM-1 · browser emulator';
+document.title = firmwareLabel + ' — FM-1 emulator';
+document.querySelector('#power small').textContent = 'runs the real ' + firmwareLabel + ' firmware, compiled to WebAssembly · sound on';
+for (const id of FIRMWARES) document.getElementById('man-' + id).style.display = FW === id ? '' : 'none';
 
 /* ---- panel mapping (firmware/src/panel.c PANEL_DEFAULT) ----
  * label order: FX SCL ENV LFO EDIT GLO HOME SAVE ARP SEQ PLAY REC OCT- OCT+ */
