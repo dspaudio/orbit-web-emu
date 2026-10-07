@@ -27,6 +27,8 @@ document.getElementById('title').innerHTML = FW === 'felucca'
 document.title = (FW === 'felucca' ? 'Felucca' : 'SLOOP') + ' — FM-1 emulator';
 document.querySelector('#power small').textContent =
     'runs the real ' + (FW === 'felucca' ? 'Felucca' : 'SLOOP') + ' firmware, compiled to WebAssembly · sound on';
+document.getElementById('man-sloop').style.display = FW === 'sloop' ? '' : 'none';
+document.getElementById('man-felucca').style.display = FW === 'felucca' ? '' : 'none';
 
 /* ---- panel mapping (firmware/src/panel.c PANEL_DEFAULT) ----
  * label order: FX SCL ENV LFO EDIT GLO HOME SAVE ARP SEQ PLAY REC OCT- OCT+ */
