@@ -4,6 +4,10 @@ A fork of [sabliran/sloop-web-emu](https://github.com/sabliran/sloop-web-emu) th
 
 **ORBIT 0.2.1 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
 
+**Try it online:** https://dspaudio.github.io/orbit-web-emu/
+
+![Published browser preset list](docs/orbit-web-presets.jpg)
+
 ## Run the compiled emulator
 
 The `docs/` directory contains the compiled module and static application. Serve it locally:
@@ -49,7 +53,7 @@ HOME now briefly displays the engine and actual loaded preset when PRESETS is tu
 - WebAssembly smoke test: PASS; module size 1,058,655 bytes, no imports.
 - Actual synth output: finite, non-silent PCM; observed peak 0.4307.
 - Flash: 458,752-byte image, 15 storage writes, restored image preserved across boot.
-- Browser AudioWorklet boot and HOME rendering: verified on the published site.
+- Browser AudioWorklet boot, HOME rendering and quick SAVE tap into the PRESETS list: verified on the published site.
 
 ![Actual ORBIT WebAssembly HOME framebuffer](docs/orbit-wasm-home.png)
 
