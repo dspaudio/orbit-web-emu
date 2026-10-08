@@ -2,7 +2,7 @@
 
 A fork of [sabliran/sloop-web-emu](https://github.com/sabliran/sloop-web-emu) that runs the actual [ORBIT FM-1 firmware](https://github.com/dspaudio/orbit) as WebAssembly inside an AudioWorklet.
 
-**ORBIT 0.3.0 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
+**ORBIT 0.3.1 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
 
 **Try it online:** https://dspaudio.github.io/orbit-web-emu/
 
@@ -30,6 +30,7 @@ ORBIT=../orbit ./build.sh
 node tests/orbit-wasm.mjs
 node tests/orbit-worklet.mjs
 node tests/orbit-engines.mjs
+node tests/orbit-lfo.mjs
 cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-info.json docs/
 ```
 
@@ -44,6 +45,14 @@ To load the editable **FIRST LIGHT** demo, stop playback, hold HOME, scroll PRES
 [Listen to FIRST LIGHT](https://github.com/dspaudio/orbit/blob/main/docs/audio/orbit-first-light.mp3) · [Engine feasibility and limits](https://github.com/dspaudio/orbit/blob/main/docs/OP1-ENGINES.md)
 
 These engines are original implementations of publicly documented synthesis families, not OP-1 algorithm ports or factory sounds. Shared envelopes, FX, voice scheduling, drums and sampler infrastructure remain derived from SLOOP/Felucca.
+
+## LFO source and modulation depths (0.3.1)
+
+Press LFO to open **LFO SOURCE 1/2**: RATE, WAVE, PHS and FADE define the modulation signal. Press LFO again for **LFO DEST 2/2**: PIT, FLT, SHP and AMP determine where it changes the sound and by how much. All four depths at zero means no audible modulation; SOURCE displays `NO DEPTH: PRESS LFO`.
+
+For a clear test, set DEST KNOB4 / AMP to about 50%, hold a note, then adjust SOURCE RATE/WAVE. PHS sets a new phrase's starting phase; release all keys and retrigger. FADE gradually introduces modulation after retrigger. SHP controls SWARM harmonic balance, PULSE width and FM4 operator modulation depth. No destination is automatically enabled, so original patch defaults remain unchanged.
+
+The new wasm regression test presses the actual LFO button twice, changes each physical destination knob and compares finite PCM for all three engines; all twelve engine/destination combinations change the output.
 
 ## Input corrections
 
@@ -62,7 +71,7 @@ HOME now briefly displays the engine and actual loaded preset when PRESETS is tu
 
 - New twelve-preset and FIRST LIGHT menu/confirmation/PLAY wasm test: PASS; demo peak 0.7636.
 - ORBIT wasm32 build: PASS (clang 18.1.3 + lld).
-- WebAssembly smoke test: PASS; module size 1,064,302 bytes, no imports.
+- WebAssembly smoke test: PASS; module size 1,064,642 bytes, no imports.
 - Actual synth output: finite, non-silent PCM; observed peak 0.5752.
 - Flash: 458,752-byte image, 15 storage writes, restored image preserved across boot.
 - Published ORBIT 0.3.0 browser AudioWorklet boot and quick SAVE tap into the 80-sound PRESETS list: verified. Versioned asset URLs prevent stale JavaScript/DSP caches.

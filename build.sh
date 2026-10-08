@@ -28,6 +28,6 @@ python3 - "$ORBIT" <<'PY'
 import json,pathlib,subprocess,sys
 p=pathlib.Path(sys.argv[1])
 revision=subprocess.check_output(['git','-C',str(p),'rev-parse','HEAD'],text=True).strip()
-json.dump({'firmware':'ORBIT 0.3.0','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':pathlib.Path('ORBIT_REVISION').read_text().strip()},open('dist/build-info.json','w'),indent=2)
+json.dump({'firmware':'ORBIT 0.3.1','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':pathlib.Path('ORBIT_REVISION').read_text().strip()},open('dist/build-info.json','w'),indent=2)
 PY
 ls -lh dist/orbit.wasm
