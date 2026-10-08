@@ -65,7 +65,9 @@ HOME now briefly displays the engine and actual loaded preset when PRESETS is tu
 - WebAssembly smoke test: PASS; module size 1,064,302 bytes, no imports.
 - Actual synth output: finite, non-silent PCM; observed peak 0.5752.
 - Flash: 458,752-byte image, 15 storage writes, restored image preserved across boot.
-- Browser AudioWorklet boot, HOME rendering and quick SAVE tap into the PRESETS list: verified on the published site.
+- Published ORBIT 0.3.0 browser AudioWorklet boot and quick SAVE tap into the 80-sound PRESETS list: verified. Versioned asset URLs prevent stale JavaScript/DSP caches.
+
+![Published ORBIT 0.3.0 preset list](docs/orbit-web-presets.jpg)
 
 ![Actual ORBIT WebAssembly HOME framebuffer](docs/orbit-wasm-home.png)
 
