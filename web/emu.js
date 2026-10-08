@@ -317,9 +317,9 @@ async function saveFlash(buf) {
 async function powerOn() {
     document.getElementById('power').remove();
     ctx = new AudioContext({ sampleRate: 44100, latencyHint: 'interactive' });
-    await ctx.audioWorklet.addModule('worklet.js');
+    await ctx.audioWorklet.addModule('worklet.js?v=0.3.0');
     const [wasmBytes, flashImage] = await Promise.all([
-        (await fetch(FW + '.wasm')).arrayBuffer(),
+        (await fetch(FW + '.wasm' + (FW === 'orbit' ? '?v=0.3.0' : ''))).arrayBuffer(),
         loadFlash(),
     ]);
     node = new AudioWorkletNode(ctx, 'sloop', {
