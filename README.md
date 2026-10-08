@@ -2,11 +2,11 @@
 
 A fork of [sabliran/sloop-web-emu](https://github.com/sabliran/sloop-web-emu) that runs the actual [ORBIT FM-1 firmware](https://github.com/dspaudio/orbit) as WebAssembly inside an AudioWorklet.
 
-**ORBIT 0.2.1 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
+**ORBIT 0.3.0 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
 
 **Try it online:** https://dspaudio.github.io/orbit-web-emu/
 
-![Published browser preset list](docs/orbit-web-presets.jpg)
+![Independent ORBIT engines](https://raw.githubusercontent.com/dspaudio/orbit/main/docs/orbit-engines-0.3.png)
 
 ## Run the compiled emulator
 
@@ -29,14 +29,25 @@ python3 -m pip install -r ../orbit/requirements.txt
 ORBIT=../orbit ./build.sh
 node tests/orbit-wasm.mjs
 node tests/orbit-worklet.mjs
+node tests/orbit-engines.mjs
 cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-info.json docs/
 ```
 
 `ORBIT_REVISION` pins the published source revision. `build-info.json` records the checkout used for the build. The original comparison binaries are copied from the fork's `docs/` directory and are not rebuilt by this command.
 
+## Independent engines and demo song
+
+ORBIT 0.3.0 adds independently written SWARM, PULSE and FM4 engines with twelve original patches. Fresh/empty projects use the new engines; saved projects keep their stored engine IDs. The first twelve PRESETS entries are ORBIT sounds. The original upstream engines remain available for compatibility.
+
+To load the editable **FIRST LIGHT** demo, stop playback, hold HOME, scroll PRESETS to DEMO SONG, then press OCT+ twice. The first press shows AGAIN; OCT− cancels. Press PLAY after loading. The demo replaces the current working project and is subject to normal autosave, so save work first. It does not write numbered saved project slots. The four-bar, 108 BPM loop combines FM4 bass, SWARM chord sustains, PULSE plucks and synthesised 808 drums.
+
+[Listen to FIRST LIGHT](https://github.com/dspaudio/orbit/blob/main/docs/audio/orbit-first-light.mp3) · [Engine feasibility and limits](https://github.com/dspaudio/orbit/blob/main/docs/OP1-ENGINES.md)
+
+These engines are original implementations of publicly documented synthesis families, not OP-1 algorithm ports or factory sounds. Shared envelopes, FX, voice scheduling, drums and sampler infrastructure remain derived from SLOOP/Felucca.
+
 ## Input corrections
 
-HOME now briefly displays the engine and actual loaded preset when PRESETS is turned. The preset bank selects individual sounds; all 68 factory mappings resolve. Short button presses are queued across firmware UI frames, so fast SAVE/EDIT/SEQ taps are recognised. The AudioWorklet regression test checks a rapid SAVE press/release followed by a preset detent.
+HOME now briefly displays the engine and actual loaded preset when PRESETS is turned. The preset bank selects individual sounds; all 80 factory mappings resolve. Short button presses are queued across firmware UI frames, so fast SAVE/EDIT/SEQ taps are recognised. The AudioWorklet regression test checks a rapid SAVE press/release followed by a preset detent.
 
 ## ORBIT controls
 
@@ -49,9 +60,10 @@ HOME now briefly displays the engine and actual loaded preset when PRESETS is tu
 
 ## Validation and progress
 
+- New twelve-preset and FIRST LIGHT menu/confirmation/PLAY wasm test: PASS; demo peak 0.7636.
 - ORBIT wasm32 build: PASS (clang 18.1.3 + lld).
-- WebAssembly smoke test: PASS; module size 1,058,655 bytes, no imports.
-- Actual synth output: finite, non-silent PCM; observed peak 0.4307.
+- WebAssembly smoke test: PASS; module size 1,064,302 bytes, no imports.
+- Actual synth output: finite, non-silent PCM; observed peak 0.5752.
 - Flash: 458,752-byte image, 15 storage writes, restored image preserved across boot.
 - Browser AudioWorklet boot, HOME rendering and quick SAVE tap into the PRESETS list: verified on the published site.
 

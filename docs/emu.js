@@ -25,7 +25,7 @@ document.getElementById('fw').addEventListener('click', ev => {
     localStorage.setItem('orbit-emu-fw', choice.dataset.fw);
     location.reload();
 });
-const firmwareLabel = {orbit: 'ORBIT 0.2.1', sloop: 'SLOOP', felucca: 'FELUCCA'}[FW];
+const firmwareLabel = {orbit: 'ORBIT 0.3.0', sloop: 'SLOOP', felucca: 'FELUCCA'}[FW];
 document.getElementById('title').innerHTML = '<b>' + firmwareLabel + '</b> · M-VAVE FM-1 · browser emulator';
 document.title = firmwareLabel + ' — FM-1 emulator';
 document.querySelector('#power small').textContent = 'runs the real ' + firmwareLabel + ' firmware, compiled to WebAssembly · sound on';
