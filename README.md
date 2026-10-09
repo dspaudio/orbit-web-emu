@@ -2,11 +2,15 @@
 
 A fork of [sabliran/sloop-web-emu](https://github.com/sabliran/sloop-web-emu) that runs the actual [ORBIT FM-1 firmware](https://github.com/dspaudio/orbit) as WebAssembly inside an AudioWorklet.
 
-**ORBIT 0.3.1 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
+**ORBIT 0.4.0 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
 
 **Try it online:** https://dspaudio.github.io/orbit-web-emu/
 
 ![Independent ORBIT engines](https://raw.githubusercontent.com/dspaudio/orbit/main/docs/orbit-engines-0.3.png)
+
+## ORBIT 0.4.0
+
+FM6, 12종 Visualizer 및 컬러 스타일을 지원합니다. HOME을 길게 눌러 SCREEN 메뉴를 열고 KNOB1 / STYLE로 ORBIT, PASTEL, NEON, MONO 또는 단색 테마를 선택합니다. OCT−로 닫으면 로컬 플래시에 저장됩니다. HOME에서 SAVE를 누르면 SONG이 열리며 EDIT 화면에서 SAVE를 누르면 PRESETS가 열립니다.
 
 ## Run the compiled emulator
 
@@ -31,6 +35,7 @@ node tests/orbit-wasm.mjs
 node tests/orbit-worklet.mjs
 node tests/orbit-engines.mjs
 node tests/orbit-lfo.mjs
+node tests/orbit-2.4.mjs
 cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-info.json docs/
 ```
 
@@ -40,7 +45,7 @@ cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-in
 
 ORBIT 0.3.0 adds independently written SWARM, PULSE and FM4 engines with twelve original patches. Fresh/empty projects use the new engines; saved projects keep their stored engine IDs. The first twelve PRESETS entries are ORBIT sounds. The original upstream engines remain available for compatibility.
 
-To load the editable **FIRST LIGHT** demo, stop playback, hold HOME, scroll PRESETS to DEMO SONG, then press OCT+ twice. The first press shows AGAIN; OCT− cancels. Press PLAY after loading. The demo replaces the current working project and is subject to normal autosave, so save work first. It does not write numbered saved project slots. The four-bar, 108 BPM loop combines FM4 bass, SWARM chord sustains, PULSE plucks and synthesised 808 drums.
+To load the editable **FIRST LIGHT** demo, stop playback, hold HOME, turn SELECT to SYSTEM, scroll PRESETS to DEMO SONG, then press OCT+ twice. The first press shows AGAIN; OCT− cancels. Press PLAY after loading. The demo replaces the current working project and is subject to normal autosave, so save work first. It does not write numbered saved project slots. The four-bar, 108 BPM loop combines FM4 bass, SWARM chord sustains, PULSE plucks and synthesised 808 drums.
 
 [Listen to FIRST LIGHT](https://github.com/dspaudio/orbit/blob/main/docs/audio/orbit-first-light.mp3) · [Engine feasibility and limits](https://github.com/dspaudio/orbit/blob/main/docs/OP1-ENGINES.md)
 
@@ -69,11 +74,11 @@ HOME now briefly displays the engine and actual loaded preset when PRESETS is tu
 
 ## Validation and progress
 
-- New twelve-preset and FIRST LIGHT menu/confirmation/PLAY wasm test: PASS; demo peak 0.7636.
-- ORBIT wasm32 build: PASS (clang 18.1.3 + lld).
-- WebAssembly smoke test: PASS; module size 1,064,642 bytes, no imports.
-- Actual synth output: finite, non-silent PCM; observed peak 0.5752.
-- Flash: 458,752-byte image, 15 storage writes, restored image preserved across boot.
+- ORBIT 0.4.0: clang/LLD 23.1.3 빌드 및 Node 회귀 검사 5개 통과.
+- 12종 프리셋과 FIRST LIGHT 메뉴/확인/PLAY 검증 통과. demo peak 0.780365.
+- WebAssembly 크기 1,132,268바이트, 외부 import 0개. 실제 합성 PCM은 유한하고 음량 peak 0.575165.
+- 플래시 458,752바이트, 저장 17회. 저장 이미지를 넣은 재부팅 검증 통과.
+- SWARM/PULSE/FM4의 LFO 목적지 12개, FM6 프리셋 8개 발음, MONO 설정 재부팅 복원, Visualizer 선택 검증 통과.
 - Published ORBIT 0.3.0 browser AudioWorklet boot and quick SAVE tap into the 80-sound PRESETS list: verified. Versioned asset URLs prevent stale JavaScript/DSP caches.
 
 ![Published ORBIT 0.3.0 preset list](docs/orbit-web-presets.jpg)

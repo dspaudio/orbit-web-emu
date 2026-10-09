@@ -204,7 +204,7 @@ static void fm1_enter_uboot(void) {}
 #define EMU_FLASH_SIZE 0x70000u
 static uint8_t emu_flash[EMU_FLASH_SIZE];
 static volatile uint32_t emu_flash_gen;
-#define SMP_USER_XIP(k) (emu_flash + (SMP_USER_BASE - EMU_FLASH_BASE) + (k) * SMP_USER_SIZE)
+#define SMP_USER_XIP(k) (emu_flash + (SMP_USER_OFF((uint32_t)(k)) - EMU_FLASH_BASE))
 
 #include "engines.c"
 #include "drums.c"
@@ -226,6 +226,7 @@ static volatile uint32_t emu_flash_gen;
 #include "ui_studio.c"
 #include "icons.c"
 #include "ui_draw.c"
+#include "ui_vis.c"
 #include "ui_layers.c"
 #include "ui_menu.c"
 #include "ui_input.c"
@@ -268,6 +269,7 @@ static int st_prog(uint32_t off, const void *src, uint32_t n)
 }
 #include "storage.c"
 #include "upreset.c"
+#define FM6_BANK_XIP(copy) (emu_flash + st_sector(OBJ_FM6BANK, copy) + ST_PAYLOAD_OFF - EMU_FLASH_BASE)
 #include "project.c"
 #include "splash.c"
 
@@ -279,6 +281,7 @@ static uint32_t emu_ms_acc;
 /* power-on defaults, as main.c felucca_init() */
 static void emu_felucca_init(void)
 {
+    fm6_init();
     uint32_t i;
     for (i = 0; i < G_COUNT; i++)
         song.g[i] = GP[i].def;

@@ -28,7 +28,8 @@ for(let p=0;p<12;p++) {
 btn(8); // HOME
 e.emu_input(0,1<<8);pump(420);e.emu_input(0,0);pump(12); // hold HOME, actual menu
 const menu=frame();
-for(let i=0;i<8;i++){e.emu_enc(6,1);pump(12);} // DEMO SONG
+for(let i=0;i<3;i++){e.emu_enc(0,1);pump(12);} // SYSTEM 메뉴
+for(let i=0;i<2;i++){e.emu_enc(6,1);pump(12);} // DEMO SONG
 btn(1); const armed=frame(); assert(!armed.equals(menu),'demo confirmation renders');
 btn(1); const loaded=frame(); assert(!loaded.equals(armed),'demo loads and returns HOME');
 btn(12); // PLAY

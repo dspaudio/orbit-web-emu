@@ -10,9 +10,10 @@ if [ ! -f "$ORBIT/firmware/src/orbit_modes.c" ]; then
     exit 1
 fi
 mkdir -p "$ORBIT/build/gen" dist
-for g in font icons tables samples drumkits logo; do
+for g in font icons tables samples drumkits fm6_patches logo; do
     name="felucca_$g.h"
     [ "$g" != logo ] || name=sloop_logo.h
+    [ "$g" != fm6_patches ] || name=felucca_fm6.h
     (cd "$ORBIT" && python3 "tools/gen_$g.py" "build/gen/$name")
 done
 "$CLANG" --target=wasm32 -O2 -fno-builtin -ffreestanding -nostdlib \
@@ -28,6 +29,6 @@ python3 - "$ORBIT" <<'PY'
 import json,pathlib,subprocess,sys
 p=pathlib.Path(sys.argv[1])
 revision=subprocess.check_output(['git','-C',str(p),'rev-parse','HEAD'],text=True).strip()
-json.dump({'firmware':'ORBIT 0.3.1','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':pathlib.Path('ORBIT_REVISION').read_text().strip()},open('dist/build-info.json','w'),indent=2)
+json.dump({'firmware':'ORBIT 0.4.0','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':pathlib.Path('ORBIT_REVISION').read_text().strip()},open('dist/build-info.json','w'),indent=2)
 PY
 ls -lh dist/orbit.wasm

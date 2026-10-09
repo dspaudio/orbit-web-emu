@@ -19,7 +19,9 @@ send({t:'input',notes:0,buttons:0});
 assert.equal(p.buttonQueue.length,2,'press and release remain distinct');
 pump(24);
 assert.equal(p.inputButtons,0); assert.equal(p.buttonQueue.length,0);
-assert(!screen().equals(home),'a short SAVE tap opens the preset browser');
+assert(!screen().equals(home),'a short SAVE tap opens SONG');
+// SONG에서 HOME, EDIT, SAVE 순서로 프리셋 브라우저를 연다.
+for(const id of [8,6,9]) { send({t:'input',notes:0,buttons:1<<id}); send({t:'input',notes:0,buttons:0}); pump(24); }
 const browser=screen(); send({t:'enc',e:6,steps:1}); pump(12);
 assert(!screen().equals(browser),'PRESETS detent updates the browser');
 send({t:'input',notes:1<<7,buttons:0}); pump(12);
