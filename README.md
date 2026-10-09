@@ -2,13 +2,17 @@
 
 A fork of [sabliran/sloop-web-emu](https://github.com/sabliran/sloop-web-emu) that runs the actual [ORBIT FM-1 firmware](https://github.com/dspaudio/orbit) as WebAssembly inside an AudioWorklet.
 
-**ORBIT 0.4.0 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
+**ORBIT 0.4.1 is the default firmware.** SLOOP and Felucca remain available as the original upstream comparison binaries. Use the firmware selector at the top left to switch. Each firmware has its own locally stored flash image.
 
 **Try it online:** https://dspaudio.github.io/orbit-web-emu/
 
 ![Independent ORBIT engines](https://raw.githubusercontent.com/dspaudio/orbit/main/docs/orbit-engines-0.3.png)
 
-## ORBIT 0.4.0
+## ORBIT 0.4.1
+
+최신 [펌웨어 릴리스](https://github.com/dspaudio/orbit/releases/tag/v0.4.1)의 C 소스를 다시 빌드합니다. Orbit 부트 워드마크와 blue / green / white / orange encoder, T1–T4 sound 모듈, LEVEL / PAN / 기존 TRACK 믹서 페이지를 반영합니다. Visualizer는 실제 C 엔진의 좌우 tap을 사용합니다. 브라우저 flash namespace와 비교 펌웨어는 유지합니다.
+
+## 0.4.0에서 통합한 기능
 
 FM6, 12종 Visualizer 및 컬러 스타일을 지원합니다. HOME을 길게 눌러 SCREEN 메뉴를 열고 KNOB1 / STYLE로 ORBIT, PASTEL, NEON, MONO 또는 단색 테마를 선택합니다. OCT−로 닫으면 로컬 플래시에 저장됩니다. HOME에서 SAVE를 누르면 SONG이 열리며 EDIT 화면에서 SAVE를 누르면 PRESETS가 열립니다.
 
@@ -36,6 +40,7 @@ node tests/orbit-worklet.mjs
 node tests/orbit-engines.mjs
 node tests/orbit-lfo.mjs
 node tests/orbit-2.4.mjs
+node tests/orbit-refresh.mjs
 cp dist/*.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-info.json docs/
 ```
 
@@ -67,12 +72,24 @@ HOME now briefly displays the engine and actual loaded preset when PRESETS is tu
 
 - HOME: event Tape. KNOB1 sets the head; KNOB2/3 set the inclusive start/end; KNOB4 selects COPY or LIFT.
 - OCT−: copy/lift the selection. OCT+: drop at the head, overwriting existing events. ALGORITHM selects the track.
-- EDIT / ENV / GLO / SEQ: synth / envelope / mixer / step sequencer.
+- Synth / Drum / Event Tape / Mixer: EDIT / track 4 + EDIT / HOME / Tape에서 GLO.
+- T1 engine / T2 envelope / T3 effect / T4 LFO: EDIT / ENV / FX / LFO. 같은 키를 다시 누르면 기존 세부 페이지를 엽니다.
+- Mixer의 SELECT: LEVEL / PAN / TRACK. LEVEL·PAN은 KNOB1–4로 네 트랙을 편집하고 TRACK은 기존 SWING / 선택 트랙 LEVEL / LEN / PAN입니다.
 - Click the keybed to play. PLAY and REC use the existing transport and live recording.
 - Computer keys: Z/X = OCT−/OCT+, 1–0 = FX/SCL/ENV/LFO/EDIT/GLO/HOME/SAVE/ARP/SEQ, Space = PLAY, R = REC, arrows = SELECT/ALGORITHM.
 - Knobs accept mouse drag or scroll. MIDI keyboard input uses the upstream emulator's mapping.
 
 ## Validation and progress
+
+### 0.4.1
+
+- source pin: `58b9f179072f127fe5f6b0e4b9e724b35d60f9a3`. clang/LLD 23.1.3 빌드와 Node 회귀 6개가 통과했습니다.
+- Wasm 1,139,293 B, 외부 import 0개. 실제 PCM peak 0.575165, FIRST LIGHT peak 0.780365, 플래시 458,752 B와 저장 후 재부팅 복원 검사 통과.
+- 네 sound 모듈, 믹서 LEVEL / PAN / TRACK, FM6 8개 프리셋, 독자 엔진·LFO, 빠른 worklet 입력, 팔레트·Visualizer 설정 검사 통과.
+- 실제 `mix_block`이 만드는 홀수 sample의 좌우 pre-master tap만 scope에 넣습니다. MASTER 0의 무음 출력에서도 오른쪽 pan의 lissajous 도해가 유지되는 회귀로 확인했습니다.
+- 이번 배포의 Aside 브라우저 화면·Web Audio 조작은 macOS 화면 기록·손쉬운 사용 권한이 거부되어 미검증입니다. 아래 기존 브라우저 검증은 이전 버전의 기록입니다.
+
+### 이전 버전 기록
 
 - ORBIT 0.4.0: clang/LLD 23.1.3 빌드 및 Node 회귀 검사 5개 통과.
 - 12종 프리셋과 FIRST LIGHT 메뉴/확인/PLAY 검증 통과. demo peak 0.780365.

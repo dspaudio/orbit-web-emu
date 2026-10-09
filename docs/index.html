@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>SLOOP — FM-1 emulator</title>
+<title>ORBIT 0.4.1 — FM-1 emulator</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#101114">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SLOOP">
+<meta name="apple-mobile-web-app-title" content="Orbit">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +31,7 @@ body { display: flex; flex-direction: column; align-items: center; padding: 18px
 
 h1 { font-size: 15px; letter-spacing: 3px; color: var(--dim); margin-bottom: 12px; font-weight: normal; }
 h1 b { color: var(--txt); }
+h1 .orbit-mark { font-family: system-ui, sans-serif; font-weight: 100; }
 
 /* the device: every control is absolutely positioned from the FM-1 user
    manual's panel drawing (page 1), normalized to the case outline */
@@ -332,13 +333,14 @@ body.compact #manual { display: none; }
 
 <div id="man-orbit">
 <h2>ORBIT · independent engines and event Tape</h2>
-<p class="lead">ORBIT 0.4.0: the actual FM-1 firmware compiled to WebAssembly. HOME edits note and drum events; it is not an audio tape recorder.</p>
+<p class="lead">ORBIT 0.4.1: the actual FM-1 firmware compiled to WebAssembly. HOME edits note and drum events; it is not an audio tape recorder.</p>
 <div class="cards">
 <div class="card"><h3>SWARM · PULSE · FM4</h3><p>Twelve original presets begin the PRESETS list. SWARM layers six detuned oscillators; PULSE combines dual pulse oscillators and PWM; FM4 provides four operators and three routes. These are independent implementations, not OP-1 factory sounds.</p></div>
 <div class="card"><h3>FIRST LIGHT demo song</h3><p>Stop playback. Hold HOME, turn SELECT to SYSTEM, scroll PRESETS to DEMO SONG, then press OCT+ twice and PLAY. OCT− cancels the first confirmation. This loads a four-bar loop at 108 BPM with FM4 bass, SWARM chords, PULSE melody and 808 drums. Save your work first: loading replaces the working project, including its normal autosave. Numbered project slots remain untouched.</p></div>
 <div class="card"><h3>LFO: source and depth</h3><p>LFO SOURCE 1/2 sets RATE, WAVE, PHS and FADE. Press LFO again for DEST 2/2: PIT, FLT, SHP and AMP depths. Zero depths mean no sound change. For an obvious effect, set DEST KNOB4 / AMP to about 50%, then adjust SOURCE RATE while holding a note. PHS and FADE affect a new phrase: release all keys and retrigger. SHP modulates harmonic balance in SWARM, pulse width in PULSE and FM depth in FM4.</p></div>
 <div class="card"><h3>Tape controls</h3><p>KNOB1 sets the head; KNOB2/3 set the inclusive region; KNOB4 chooses COPY or LIFT. OCT− copies or lifts; OCT+ drops at the head and overwrites destination events. ALGORITHM selects the track.</p></div>
-<div class="card"><h3>Explore</h3><p>EDIT: synth graphics. ENV: envelope. GLO: mixer. SEQ: the retained step sequencer. Use the keybed to play, or REC and PLAY to record events.</p></div>
+<div class="card"><h3>Modes and modules</h3><p>Synth: EDIT. Drum: select track 4, then EDIT. Event Tape: HOME. Mixer: GLO on the Tape. Sound modules T1–T4 are EDIT / ENV / FX / LFO. The four controls are blue / green / white / orange; repeated presses keep the existing parameter pages.</p></div>
+<div class="card"><h3>Mixer</h3><p>KNOB1–4 adjust track 1–4 levels. SELECT opens four-track PAN, then TRACK: global SWING / selected-track LEVEL / LEN / PAN. Press GLO again for global settings. SEQ opens the retained step sequencer.</p></div>
 <div class="card note"><h3>Test scope</h3><p>Browser flash saves locally, separately for ORBIT. Bluetooth, USB/SysEx sample upload and hardware boot checks are not supported by this emulator. Do not enter hardware calibration.</p></div>
 </div>
 <p class="src"><a href="https://github.com/dspaudio/orbit" target="_blank" rel="noopener">ORBIT source, screenshots and progress</a> · forked emulator: <a href="https://github.com/sabliran/sloop-web-emu" target="_blank" rel="noopener">sabliran/sloop-web-emu</a>.</p>
@@ -475,6 +477,6 @@ body.compact #manual { display: none; }
     more FM-1 tools: <a href="https://quixotic7.github.io/MvaveFM1-Designer/" target="_blank" rel="noopener">ChoralRoot FM-1 designer</a> — paint LED states, relabel controls and mock up 240&times;240 screens for your own firmware layouts (by <a href="https://github.com/Quixotic7/MvaveFM1-Designer" target="_blank" rel="noopener">Quixotic7</a>, MIT)
 </div>
 
-<script src="emu.js?v=0.4.0"></script>
+<script src="emu.js?v=0.4.1"></script>
 </body>
 </html>

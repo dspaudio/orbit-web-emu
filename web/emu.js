@@ -25,8 +25,8 @@ document.getElementById('fw').addEventListener('click', ev => {
     localStorage.setItem('orbit-emu-fw', choice.dataset.fw);
     location.reload();
 });
-const firmwareLabel = {orbit: 'ORBIT 0.4.0', sloop: 'SLOOP', felucca: 'FELUCCA'}[FW];
-document.getElementById('title').innerHTML = '<b>' + firmwareLabel + '</b> · M-VAVE FM-1 · browser emulator';
+const firmwareLabel = {orbit: 'ORBIT 0.4.1', sloop: 'SLOOP', felucca: 'FELUCCA'}[FW];
+document.getElementById('title').innerHTML = (FW === 'orbit' ? '<b class="orbit-mark">Orbit</b> 0.4.1' : '<b>' + firmwareLabel + '</b>') + ' · M-VAVE FM-1 · browser emulator';
 document.title = firmwareLabel + ' — FM-1 emulator';
 document.querySelector('#power small').textContent = 'runs the real ' + firmwareLabel + ' firmware, compiled to WebAssembly · sound on';
 for (const id of FIRMWARES) document.getElementById('man-' + id).style.display = FW === id ? '' : 'none';
@@ -147,7 +147,8 @@ function knobDrag(cap, turn) {           // shared drag/wheel handling
 }
 
 function buildKnobs() {
-    const KCOL = { k1: '#4f8fe8', k2: '#46b96b', k3: '#e0c23e', k4: '#e08a3e' };
+    const KCOL = FW === 'orbit' ? { k1: '#287cff', k2: '#1ecc70', k3: '#ffffff', k4: '#ff621a' }
+        : { k1: '#4f8fe8', k2: '#46b96b', k3: '#e0c23e', k4: '#e08a3e' };
     for (const [name, e, cx, cy, col] of ENCODERS) {
         label(name, cx, cy - 36);
         const cap = el('cap', cx, cy, KNOB_D, KNOB_D);
@@ -317,9 +318,9 @@ async function saveFlash(buf) {
 async function powerOn() {
     document.getElementById('power').remove();
     ctx = new AudioContext({ sampleRate: 44100, latencyHint: 'interactive' });
-    await ctx.audioWorklet.addModule('worklet.js?v=0.4.0');
+    await ctx.audioWorklet.addModule('worklet.js?v=0.4.1');
     const [wasmBytes, flashImage] = await Promise.all([
-        (await fetch(FW + '.wasm' + (FW === 'orbit' ? '?v=0.4.0' : ''))).arrayBuffer(),
+        (await fetch(FW + '.wasm' + (FW === 'orbit' ? '?v=0.4.1' : ''))).arrayBuffer(),
         loadFlash(),
     ]);
     node = new AudioWorkletNode(ctx, 'sloop', {

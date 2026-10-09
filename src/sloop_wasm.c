@@ -310,7 +310,7 @@ WASM_EXPORT("emu_init") void emu_init(void)
     persist_boot();
     settings_init();
     lcd_init();
-    sloop_splash();
+    orbit_splash();
     fm1_input_init();
     fm1_adc_init();
     panel_init();
@@ -349,8 +349,10 @@ WASM_EXPORT("emu_render") void emu_render(uint32_t n)
         mix_block(emu_mix, CTL);
         for (i = 0; i < CTL; i++) {
             int32_t l = emu_mix[2u * i], r = emu_mix[2u * i + 1u];
-            if (i & 1u)
-                scope_buf[scope_w++ & (SCOPE_N - 1u)] = (int16_t)(l > 32767 ? 32767 : l < -32768 ? -32768 : l);
+            if (i & 1u) {
+                scope_bufr[scope_w & (SCOPE_N - 1u)] = vis_tap[2u * i + 1u];
+                scope_buf[scope_w++ & (SCOPE_N - 1u)] = vis_tap[2u * i];
+            }
             emu_audio_f[2u * (k + i)] = (float)l * (1.0f / 32768.0f);
             emu_audio_f[2u * (k + i) + 1u] = (float)r * (1.0f / 32768.0f);
         }
