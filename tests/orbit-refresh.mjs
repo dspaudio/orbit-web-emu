@@ -66,4 +66,20 @@ const points = [];
 for (let y = 30; y < 210; y++) for (let x = 30; x < 210; x++) if (green.includes(fb[y * 240 + x])) points.push([x, y]);
 assert(points.length > 8, 'pre-master tap의 실제 lissajous 도해');
 assert(points.filter(([x, y]) => x < 118 && y < 118).length > 5, '오른쪽 pan의 실제 tap은 lissajous 왼쪽 위 사분면에도 그려진다');
-console.log(JSON.stringify({result: 'PASS', modules: 4, mixerPages: 3, stereoPreMasterTap: true}));
+// ORBIT 상단 우측 배터리: Tape, sound, mixer 헤더의 실제 framebuffer 픽셀을 확인한다.
+// 외곽선과 막대 슬롯은 팔레트와 무관하게 검은 배경이 아닌지로 판정한다.
+function battery(fb, bars) {
+  assert.notEqual(fb[4 * 240 + 217], 0, '상단 우측 배터리 외곽선');
+  assert.notEqual(fb[8 * 240 + 235], 0, '상단 우측 배터리 외곽선');
+  for (let k = 0; k < 3; k++) assert.equal(fb[6 * 240 + 219 + k * 5] !== 0, k < bars, '배터리 막대 수');
+}
+function settle(t, n) { for (let i = 0; i < n; i++) t.e.emu_frame(); }
+for (const press of [null, 6, 7]) {
+  const b = boot();
+  if (press !== null) b.button(press);
+  battery(b.frame(), 3);
+  b.e.emu_adc_set(3, 0); settle(b, 300); battery(b.frame(), 0);
+  b.e.emu_adc_set(3, 800); settle(b, 300); battery(b.frame(), 3);
+}
+
+console.log(JSON.stringify({result: 'PASS', modules: 4, mixerPages: 3, stereoPreMasterTap: true, batteryPages: 3}));

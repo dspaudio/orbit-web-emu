@@ -10,7 +10,7 @@ A fork of [sabliran/sloop-web-emu](https://github.com/sabliran/sloop-web-emu) th
 
 ## ORBIT 0.4.1
 
-최신 [펌웨어 릴리스](https://github.com/dspaudio/orbit/releases/tag/v0.4.1)의 C 소스를 다시 빌드합니다. Orbit 부트 워드마크와 blue / green / white / orange encoder, T1–T4 sound 모듈, LEVEL / PAN / 기존 TRACK 믹서 페이지를 반영합니다. Visualizer는 실제 C 엔진의 좌우 tap을 사용합니다. 브라우저 flash namespace와 비교 펌웨어는 유지합니다.
+[펌웨어 0.4.1](https://github.com/dspaudio/orbit/releases/tag/v0.4.1)에 배터리 표시 복구 커밋 `3074510`을 반영한 C 소스를 다시 빌드합니다. Orbit 부트 워드마크와 blue / green / white / orange encoder, T1–T4 sound 모듈, LEVEL / PAN / 기존 TRACK 믹서 페이지를 반영합니다. Tape·sound·mixer의 오른쪽 상단에 배터리 아이콘을 표시합니다. 브라우저 HAL의 기본 잔량은 모의 값이며 사용자 기기의 실제 배터리 측정값은 아닙니다. Visualizer는 실제 C 엔진의 좌우 tap을 사용합니다. 브라우저 flash namespace와 비교 펌웨어는 유지합니다.
 
 ## 0.4.0에서 통합한 기능
 
@@ -83,11 +83,12 @@ HOME now briefly displays the engine and actual loaded preset when PRESETS is tu
 
 ### 0.4.1
 
-- source pin: `58b9f179072f127fe5f6b0e4b9e724b35d60f9a3`. clang/LLD 23.1.3 빌드와 Node 회귀 6개가 통과했습니다.
-- Wasm 1,139,293 B, 외부 import 0개. 실제 PCM peak 0.575165, FIRST LIGHT peak 0.780365, 플래시 458,752 B와 저장 후 재부팅 복원 검사 통과.
+- source pin: `30745105c4a0051ec440396084e9e85af9184d7d`. clang/LLD 23.1.3 빌드와 Node 회귀 6개가 통과했습니다.
+- Wasm 1,139,973 B, 외부 import 0개. 실제 PCM peak 0.575165, FIRST LIGHT peak 0.780365, 플래시 458,752 B와 저장 후 재부팅 복원 검사 통과.
+- 실제 Wasm framebuffer에서 Tape·sound·mixer의 배터리 외곽선·3개 막대, 모의 ADC 잔량 감소·복구를 검사했습니다. 복구 전 Tape의 외곽선 검사 실패가 재빌드 후 통과했습니다. 자산 URL에 소스 커밋을 포함해 이전 Wasm 캐시를 구분합니다.
 - 네 sound 모듈, 믹서 LEVEL / PAN / TRACK, FM6 8개 프리셋, 독자 엔진·LFO, 빠른 worklet 입력, 팔레트·Visualizer 설정 검사 통과.
 - 실제 `mix_block`이 만드는 홀수 sample의 좌우 pre-master tap만 scope에 넣습니다. MASTER 0의 무음 출력에서도 오른쪽 pan의 lissajous 도해가 유지되는 회귀로 확인했습니다.
-- 이번 배포의 Aside 브라우저 화면·Web Audio 조작은 macOS 화면 기록·손쉬운 사용 권한이 거부되어 미검증입니다. 아래 기존 브라우저 검증은 이전 버전의 기록입니다.
+- Aside의 로컬 재빌드 페이지에서 POWER ON과 Tape·sound·mixer의 배터리 표시를 확인했습니다. 아래 기존 브라우저 검증은 이전 버전의 기록입니다.
 
 ### 이전 버전 기록
 
