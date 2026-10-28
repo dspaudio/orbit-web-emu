@@ -35,6 +35,7 @@ static void fm1_irq_on(void) {}
 /* as hal/fm1_input.h, without the matrix scan: JS writes the debounced state */
 #define FM1_NCOL 11u
 #define FM1_NKEY 41u              /* ids: 0..13 buttons, 14..40 note keys */
+#define FM1_NBTN 14u
 #define FM1_NENC 7u
 enum { FM1_BTN_OCT_DOWN = 0, FM1_BTN_OCT_UP = 1 };
 
@@ -238,6 +239,7 @@ static volatile uint32_t emu_flash_gen;
 #define FELUCCA_FLASH 1
 static uint8_t flash_ok;
 #define FL_FAR(f) f
+#define FL_JEDEC_OK(id) ((id) == 0x856014u)
 static uint32_t fl_jedec_ram(void) { return 0x856014u; }   /* the expected part: flash_ok */
 static void fl_plain_window_init(void) {}
 static int emu_fl_ok(uint32_t off, uint32_t n)
@@ -300,6 +302,10 @@ static void emu_felucca_init(void)
     song.master_q12 = 2048;
     autosave_resume();
     song.g[G_SYNC] = (int16_t)lights_sync;
+    song.g[G_MIDI] = (int16_t)lights_mout;
+    song.g[G_ROUTE] = (int16_t)lights_min;
+    song.g[G_CH1] = midi_set[0], song.g[G_CH2] = midi_set[1], song.g[G_CH3] = midi_set[2];
+    song.g[G_DRCH] = midi_set[3], song.g[G_CHOTH] = midi_set[4], song.g[G_BEND] = midi_set[5];
     layers_init();
     go_home();
     ui.force = 1;
@@ -388,7 +394,7 @@ WASM_EXPORT("emu_adc_set") void emu_adc_set(uint32_t ch, int32_t v)
 
 WASM_EXPORT("emu_midi") void emu_midi(uint32_t pkt)   /* a USB-MIDI event packet */
 {
-    midi_in_q[mi_w++ % MQ] = pkt;
+    midi_in_event(pkt);
 }
 
 WASM_EXPORT("emu_fb_ptr") uint32_t emu_fb_ptr(void) { return (uint32_t)(uintptr_t)emu_fb; }

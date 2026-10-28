@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-only
-# Compile ORBIT using the upstream browser HAL; retain baseline comparisons.
+# Compile ORBIT 0.8.1 using the browser HAL.
 set -eu
 cd "$(dirname "$0")"
 ORBIT=${ORBIT:-../orbit}
@@ -10,7 +10,7 @@ if [ ! -f "$ORBIT/firmware/src/orbit_modes.c" ]; then
     exit 1
 fi
 mkdir -p "$ORBIT/build/gen" dist
-for g in font icons tables samples drumkits fm6_patches logo; do
+for g in font icons tables samples drumkits fm6_patches op1_cluster logo; do
     name="felucca_$g.h"
     [ "$g" != logo ] || name=sloop_logo.h
     [ "$g" != fm6_patches ] || name=felucca_fm6.h
@@ -23,12 +23,13 @@ done
     -Wl,--global-base=1048576 -o dist/orbit.wasm src/sloop_wasm.c
 cp web/index.html web/emu.js web/worklet.js web/manifest.webmanifest \
    web/icon-192.png web/icon-512.png web/apple-touch-icon.png dist/
-# Original compiled baselines are retained from the upstream fork.
-cp docs/sloop.wasm docs/felucca.wasm dist/
 python3 - "$ORBIT" <<'PY'
 import json,pathlib,subprocess,sys
 p=pathlib.Path(sys.argv[1])
 revision=subprocess.check_output(['git','-C',str(p),'rev-parse','HEAD'],text=True).strip()
-json.dump({'firmware':'ORBIT 0.4.1','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':pathlib.Path('ORBIT_REVISION').read_text().strip()},open('dist/build-info.json','w'),indent=2)
+published=pathlib.Path('ORBIT_REVISION').read_text().strip()
+if revision != published:
+    raise SystemExit('ORBIT checkout must match ORBIT_REVISION')
+json.dump({'firmware':'ORBIT 0.8.1','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':published},open('dist/build-info.json','w'),indent=2)
 PY
 ls -lh dist/orbit.wasm

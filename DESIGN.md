@@ -1,25 +1,27 @@
-# ORBIT 웹 에뮬레이터
+# ORBIT Web Emulator
 
-## 1. 정체성
-기존 FM-1 faceplate와 실제 C 화면을 유지합니다. ORBIT 역할은 [펌웨어 디자인](https://github.com/dspaudio/orbit/blob/main/DESIGN.md)을 따릅니다. SLOOP와 Felucca 비교 화면은 보존합니다.
+## 1. Identity
+The frontend targets only ORBIT 0.8.1 at source revision `514eb60ee5cbd697a11954b9cc333291c0b7f719`. Keep the FM-1 faceplate and real C display. Always load `orbit.wasm`; legacy URL parameters and stored firmware choices have no effect. SLOOP/Felucca remain source and licensing credits, not selectable firmware.
 
-## 2. 색
-ORBIT의 K1–K4 pointer는 `#287cff`, `#1ecc70`, `#ffffff`, `#ff621a`입니다. 비교 펌웨어는 기존 색을 유지합니다. 화면의 PASTEL·NEON·단색 설정은 실제 C 팔레트가 결정합니다.
+## 2. Color
+The K1-K4 pointers use `#287cff`, `#1ecc70`, `#ffffff` and `#ff621a`. The firmware C palette controls the display's PASTEL, NEON and monochrome settings.
 
-## 3. 글자
-기존 monospace UI를 유지합니다. `Orbit` 워드마크만 시스템 sans-serif, weight 100을 사용하며 버전·물리 키 label과 구분합니다.
+## 3. Type
+Keep the existing monospace UI. Only the `Orbit` wordmark uses system sans-serif at weight 100, distinct from the version and physical key labels. UI and public documentation remain English.
 
-## 4. 배치
-기존 963×588 panel 좌표와 `fitDevice` 반응형 배치를 유지합니다. 240×240 화면은 실제 WebAssembly framebuffer입니다.
+## 4. Layout
+Keep the existing 963 x 588 panel coordinates and `fitDevice` responsive behavior. The 240 x 240 display is the actual WebAssembly framebuffer. Remove the firmware switcher without moving the physical controls or redesigning the shell.
 
-## 5. 조작
-기존 `.cap`, `.btn`, keybed와 POWER를 재사용합니다. encoder·tap·hold·pressed 표시가 실제 worklet 입력과 연결되어야 합니다. HOME은 Event Tape, EDIT / ENV / FX / LFO는 sound 모듈, Tape의 GLO는 Mixer입니다.
+## 5. Controls
+The primary action is POWER ON. Priorities are the real display, playable panel controls, then the manual. Reuse `.cap`, `.btn`, the keybed and POWER; encoder, tap, hold and pressed states must retain their real worklet inputs.
 
-## 6. 움직임
-기존 knob 회전과 LCD 갱신을 유지합니다. 소리는 POWER 뒤 실제 AudioWorklet에서 시작하며 splash는 오디오 입력을 대체하지 않습니다.
+HOME alternates Event Tape and Visualizer. EDIT / ENV / FX / LFO open sound pages; GLO on Tape opens Mixer. Tape capture/drop uses SEL + OCT-/OCT+; plain OCT controls retain octave and drum behavior. On track 4, EDIT/SEQ opens DRUMS with GRID/KIT. MACROS and PERFORM belong to the synth EDIT family. The manual follows the source `GUIDE.md` and `README.md` at the revision above. There is no built-in demo menu; an earlier autosave may still contain patterns.
 
-## 7. 표면
-기존 기기 shell·knob·bezel의 재질과 깊이를 유지합니다. 장식적인 OP-1 컨트롤을 추가하지 않습니다.
+## 6. Motion and Power
+Keep knob rotation and LCD updates. The AudioContext, firmware load and sound start behind POWER ON, through the existing AudioWorklet and splash timing.
 
-## 8. 검증과 한계
-390px touch와 1440px desktop에서 부트·실제 화면·물리 키·소리를 확인합니다. 기존 dark-only shell과 물리 panel 접근성 제약은 이번 버전 배포에서 재설계하지 않습니다. 브라우저 검증은 FM-1 실기기 검증이 아닙니다.
+## 7. Surface and Persistence
+Keep the existing shell, knob and bezel materials and depth. Add no decorative controls. Preserve IndexedDB database `sloop-emu`, store `flash` and key `image-orbit`; do not rename, clear or migrate browser data. Retain the internal `sloop` worklet processor name for compatibility with `worklet.js`. Use asset cache key `0.8.1-514eb60`.
+
+## 8. Verification and Limits
+The focused frontend test exercises legacy URL/stored choices, the POWER gate and ORBIT flash read/write without building Wasm. It is not browser QA. The lead owns Wasm integration and browser checks at 390px touch and 1440px desktop, including boot, display, panel input, audio and persistence. The existing dark-only shell and physical-panel accessibility constraints remain outside this update's redesign scope. Browser verification does not establish FM-1 hardware behavior or timing.

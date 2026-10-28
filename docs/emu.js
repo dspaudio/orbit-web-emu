@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-only
- * SLOOP web emulator: main thread — faceplate, input, screen, LEDs.
+ * ORBIT web emulator: main thread — faceplate, input, screen, LEDs.
  * The firmware itself runs in worklet.js (wasm inside the AudioWorklet).
  *
  * The faceplate geometry is traced from the FM-1 user manual's panel drawing
@@ -9,27 +9,6 @@
 
 const S = 1.25;                          // px per drawing unit
 const DEV = { w: 963, h: 588 };
-
-/* ---- firmware selection (SLOOP or its upstream, Felucca) ----
- * Same hardware, same faceplate; only the wasm differs. The choice is kept
- * in localStorage and each firmware has its own flash image in IndexedDB. */
-const FIRMWARES = ['orbit', 'sloop', 'felucca'];
-const savedFirmware = localStorage.getItem('orbit-emu-fw');
-const FW = FIRMWARES.includes(savedFirmware) ? savedFirmware : 'orbit';
-document.querySelectorAll('#fw span').forEach(s => {
-    s.classList.toggle('on', s.dataset.fw === FW);
-});
-document.getElementById('fw').addEventListener('click', ev => {
-    const choice = ev.target.closest('[data-fw]');
-    if (!choice || choice.dataset.fw === FW) return;
-    localStorage.setItem('orbit-emu-fw', choice.dataset.fw);
-    location.reload();
-});
-const firmwareLabel = {orbit: 'ORBIT 0.4.1', sloop: 'SLOOP', felucca: 'FELUCCA'}[FW];
-document.getElementById('title').innerHTML = (FW === 'orbit' ? '<b class="orbit-mark">Orbit</b> 0.4.1' : '<b>' + firmwareLabel + '</b>') + ' · M-VAVE FM-1 · browser emulator';
-document.title = firmwareLabel + ' — FM-1 emulator';
-document.querySelector('#power small').textContent = 'runs the real ' + firmwareLabel + ' firmware, compiled to WebAssembly · sound on';
-for (const id of FIRMWARES) document.getElementById('man-' + id).style.display = FW === id ? '' : 'none';
 
 /* ---- panel mapping (firmware/src/panel.c PANEL_DEFAULT) ----
  * label order: FX SCL ENV LFO EDIT GLO HOME SAVE ARP SEQ PLAY REC OCT- OCT+ */
@@ -147,8 +126,7 @@ function knobDrag(cap, turn) {           // shared drag/wheel handling
 }
 
 function buildKnobs() {
-    const KCOL = FW === 'orbit' ? { k1: '#287cff', k2: '#1ecc70', k3: '#ffffff', k4: '#ff621a' }
-        : { k1: '#4f8fe8', k2: '#46b96b', k3: '#e0c23e', k4: '#e08a3e' };
+    const KCOL = { k1: '#287cff', k2: '#1ecc70', k3: '#ffffff', k4: '#ff621a' };
     for (const [name, e, cx, cy, col] of ENCODERS) {
         label(name, cx, cy - 36);
         const cap = el('cap', cx, cy, KNOB_D, KNOB_D);
@@ -294,7 +272,7 @@ function idb() {
         r.onerror = () => rej(r.error);
     });
 }
-const FLASH_KEY = 'image-' + FW;
+const FLASH_KEY = 'image-orbit';
 async function loadFlash() {
     try {
         const db = await idb();
@@ -303,8 +281,7 @@ async function loadFlash() {
             q.onsuccess = () => res(q.result || null);
             q.onerror = () => res(null);
         });
-        return (await get(FLASH_KEY)) ||
-               (FW === 'sloop' ? await get('image') : null);   // pre-switcher saves
+        return await get(FLASH_KEY);
     } catch (e) { return null; }
 }
 async function saveFlash(buf) {
@@ -318,9 +295,9 @@ async function saveFlash(buf) {
 async function powerOn() {
     document.getElementById('power').remove();
     ctx = new AudioContext({ sampleRate: 44100, latencyHint: 'interactive' });
-    await ctx.audioWorklet.addModule('worklet.js?v=0.4.1-3074510');
+    await ctx.audioWorklet.addModule('worklet.js?v=0.8.1-514eb60');
     const [wasmBytes, flashImage] = await Promise.all([
-        (await fetch(FW + '.wasm' + (FW === 'orbit' ? '?v=0.4.1-3074510' : ''))).arrayBuffer(),
+        (await fetch('orbit.wasm?v=0.8.1-514eb60')).arrayBuffer(),
         loadFlash(),
     ]);
     node = new AudioWorkletNode(ctx, 'sloop', {

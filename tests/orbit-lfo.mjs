@@ -16,7 +16,7 @@ function render(bank,destination) {
   }
   function btn(id){e.emu_input(0,1<<id);pump(12);e.emu_input(0,0);pump(12);}
   e.emu_enc(6,bank-10);pump(24);
-  btn(5);btn(5); // physical LFO twice: source -> destinations
+  btn(5);btn(5);btn(5); // physical LFO: source -> sync -> destinations
   for(let i=0;i<4;i++){e.emu_enc(2+i,destination===i?40:0);pump(12);}
   e.emu_input(1<<7,0);
   const pcm=[];pump(700,pcm);return pcm;
