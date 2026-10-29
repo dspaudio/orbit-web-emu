@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ORBIT 0.8.1 — FM-1 emulator</title>
-<link rel="manifest" href="manifest.webmanifest?v=0.8.1-514eb60">
+<title>ORBIT 0.8.2 — FM-1 emulator</title>
+<link rel="manifest" href="manifest.webmanifest?v=0.8.2-5824b5b">
 <meta name="theme-color" content="#101114">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -256,7 +256,7 @@ body.compact #manual { display: none; }
 </style>
 </head>
 <body>
-<h1 id="title"><b class="orbit-mark">Orbit</b> 0.8.1 &middot; M-VAVE FM-1 &middot; browser emulator</h1>
+<h1 id="title"><b class="orbit-mark">Orbit</b> 0.8.2 &middot; M-VAVE FM-1 &middot; browser emulator</h1>
 
 <button id="fs" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
 
@@ -267,7 +267,7 @@ body.compact #manual { display: none; }
 </div></div>
 
 <div id="device">
-    <div id="power"><div class="ring">&#x23FB;</div><span>POWER ON</span><small>runs the real ORBIT 0.8.1 firmware, compiled to WebAssembly &middot; sound on</small></div>
+    <div id="power"><div class="ring">&#x23FB;</div><span>POWER ON</span><small>runs the real ORBIT 0.8.2 firmware, compiled to WebAssembly &middot; sound on</small></div>
 </div>
 
 <section id="manual">
@@ -300,7 +300,7 @@ body.compact #manual { display: none; }
 </div>
 
 <div id="man-orbit">
-<h2>ORBIT 0.8.1 · HOW TO PLAY</h2>
+<h2>ORBIT 0.8.2 · HOW TO PLAY</h2>
 <p class="lead">Three synth tracks and a drum machine, running the actual FM-1 firmware in WebAssembly. HOME opens Event Tape: an editor for sequencer notes and drum events, not an audio tape recorder.</p>
 <div class="cards">
 <div class="card">
@@ -327,7 +327,7 @@ body.compact #manual { display: none; }
 </div>
 <div class="card">
 <h3>EVENT TAPE</h3>
-<p><kbd>HOME</kbd> returns to Tape; on Tape it opens Visualizer, and HOME again returns. KNOB1 sets the destination head, KNOB2/3 set the inclusive region, and KNOB4 chooses COPY or LIFT.</p>
+<p><kbd>HOME</kbd> returns to Tape (the full-screen visualizer was removed in 0.8.2). KNOB1 sets the destination head, KNOB2/3 set the inclusive region, and KNOB4 chooses COPY or LIFT.</p>
 <p><kbd>SEL</kbd> + <kbd>OCT−</kbd> captures the region; LIFT also removes it. <kbd>SEL</kbd> + <kbd>OCT+</kbd> drops at the head, overwriting destination events. ALGORITHM selects source/destination track; synth clips stay on synth tracks and drum clips stay on drums.</p>
 <p>Plain OCT−/OCT+ change synth octave, not Tape events. <kbd>EDIT</kbd> + <kbd>OCT−</kbd>/<kbd>OCT+</kbd> undo/redo supported sequence edits.</p>
 </div>
@@ -344,13 +344,13 @@ body.compact #manual { display: none; }
 <div class="card">
 <h3>SOUNDS AND MACROS</h3>
 <p>The default bank has 17 engines and 189 factory sounds, including SWARM, PULSE, FM4 and oscillator-granular CLOUD. Tracks 1–3 share eight synth voices globally; engine limits also apply.</p>
-<p>On a synth track, EDIT then SELECT reaches MACROS: KNOB1–4 assign destinations. SELECT back to PERFORM edits their values. HOME remains Tape / Visualizer.</p>
+<p>On a synth track, EDIT then SELECT reaches MACROS: KNOB1–4 assign destinations. SELECT back to PERFORM edits their values. HOME remains Tape.</p>
 <p>To save a sound and its assignments, stop playback, open SAVE &gt; USER, choose slot 1–32 with KNOB1, then turn KNOB4 SAVE positively twice within the confirmation window. KNOB2 LOAD recalls a USER sound with the same two-turn confirmation.</p>
 </div>
 <div class="card">
 <h3>ENVELOPE, LFO AND EFFECTS</h3>
 <p>ENV edits ATK / DEC / SUS / REL; ENV DEST sets FLT / PIT / SHP depths and SYNC. LFO edits RATE / WAVE / PHS / FADE; LFO 2 sets SYNC / TRIG / POL; LFO DEST sets PIT / FLT / SHP / AMP depths.</p>
-<p>Zero LFO depths mean no audible modulation. Try LFO DEST AMP near half, then adjust RATE. FX includes sends, FILTER with FILT / RES / TYPE, SLICER and INSERT; hold FX for punch-in effects.</p>
+<p>Zero LFO depths mean no audible modulation. Try LFO DEST AMP near half, then adjust RATE. FX includes sends, FILTER with FILT / RES / TYPE, SLICER and INSERT. DLY 2 sets the delay TYPE: MONO, WIDE (the right echo 13&nbsp;ms later) or PING (echoes alternate left and right). Hold FX for punch-in effects.</p>
 </div>
 <div class="card">
 <h3>MIXER AND SECTIONS</h3>
@@ -363,7 +363,7 @@ body.compact #manual { display: none; }
 <p>There is no built-in demo-song loader or DEMO SONG menu. Earlier patterns may return from your existing autosave; the update does not clear them. To start empty, first save anything you want to keep, stop, open SAVE &gt; TOOLS and confirm KNOB4 NEW (NEW PROJECT). Leave playback stopped for autosave; saved sections are separate.</p>
 </div>
 </div>
-<p class="src">Controls follow the <a href="https://github.com/dspaudio/orbit/blob/514eb60ee5cbd697a11954b9cc333291c0b7f719/GUIDE.md" target="_blank" rel="noopener">ORBIT user guide</a> and <a href="https://github.com/dspaudio/orbit/blob/514eb60ee5cbd697a11954b9cc333291c0b7f719/README.md" target="_blank" rel="noopener">source overview</a>. Emulator fork: <a href="https://github.com/sabliran/sloop-web-emu" target="_blank" rel="noopener">sabliran/sloop-web-emu</a>.</p>
+<p class="src">Controls follow the <a href="https://github.com/dspaudio/orbit/blob/5824b5b8be65f2c54fcb1087ef869101708a90e3/GUIDE.md" target="_blank" rel="noopener">ORBIT user guide</a> and <a href="https://github.com/dspaudio/orbit/blob/5824b5b8be65f2c54fcb1087ef869101708a90e3/README.md" target="_blank" rel="noopener">source overview</a>. Emulator fork: <a href="https://github.com/sabliran/sloop-web-emu" target="_blank" rel="noopener">sabliran/sloop-web-emu</a>.</p>
 </div>
 
 <h2>IN THIS EMULATOR</h2>
@@ -388,6 +388,6 @@ body.compact #manual { display: none; }
     more FM-1 tools: <a href="https://quixotic7.github.io/MvaveFM1-Designer/" target="_blank" rel="noopener">ChoralRoot FM-1 designer</a> — paint LED states, relabel controls and mock up 240&times;240 screens for your own firmware layouts (by <a href="https://github.com/Quixotic7/MvaveFM1-Designer" target="_blank" rel="noopener">Quixotic7</a>, MIT)
 </div>
 
-<script src="emu.js?v=0.8.1-514eb60"></script>
+<script src="emu.js?v=0.8.2-5824b5b"></script>
 </body>
 </html>

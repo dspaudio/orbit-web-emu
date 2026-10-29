@@ -227,7 +227,6 @@ static volatile uint32_t emu_flash_gen;
 #include "ui_studio.c"
 #include "icons.c"
 #include "ui_draw.c"
-#include "ui_vis.c"
 #include "ui_layers.c"
 #include "ui_menu.c"
 #include "ui_input.c"
@@ -356,7 +355,6 @@ WASM_EXPORT("emu_render") void emu_render(uint32_t n)
         for (i = 0; i < CTL; i++) {
             int32_t l = emu_mix[2u * i], r = emu_mix[2u * i + 1u];
             if (i & 1u) {
-                scope_bufr[scope_w & (SCOPE_N - 1u)] = vis_tap[2u * i + 1u];
                 scope_buf[scope_w++ & (SCOPE_N - 1u)] = vis_tap[2u * i];
             }
             emu_audio_f[2u * (k + i)] = (float)l * (1.0f / 32768.0f);

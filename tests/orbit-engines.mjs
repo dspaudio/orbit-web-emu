@@ -25,7 +25,7 @@ for(let p=0;p<12;p++) {
   assert(peaks[p]>0.001,`ORBIT preset ${p} generates audio`);
 }
 btn(8); // HOME
-// ORBIT 0.8.1 has no built-in demo: record a real free take through panel inputs.
+// ORBIT 0.8.x has no built-in demo: record a real free take through panel inputs.
 btn(13); // REC
 e.emu_input(1<<7,0);pump(200);
 e.emu_input(0,0);pump(150);

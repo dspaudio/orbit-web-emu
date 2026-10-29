@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-only
-# Compile ORBIT 0.8.1 using the browser HAL.
+# Compile ORBIT 0.8.2 using the browser HAL.
 set -eu
 cd "$(dirname "$0")"
 ORBIT=${ORBIT:-../orbit}
@@ -30,6 +30,6 @@ revision=subprocess.check_output(['git','-C',str(p),'rev-parse','HEAD'],text=Tru
 published=pathlib.Path('ORBIT_REVISION').read_text().strip()
 if revision != published:
     raise SystemExit('ORBIT checkout must match ORBIT_REVISION')
-json.dump({'firmware':'ORBIT 0.8.1','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':published},open('dist/build-info.json','w'),indent=2)
+json.dump({'firmware':'ORBIT 0.8.2','source':'https://github.com/dspaudio/orbit','source_checkout_commit':revision,'published_source_commit':published},open('dist/build-info.json','w'),indent=2)
 PY
 ls -lh dist/orbit.wasm

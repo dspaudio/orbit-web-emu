@@ -1,7 +1,7 @@
 {
-  "name": "ORBIT 0.8.1 \u2014 FM-1 emulator",
+  "name": "ORBIT 0.8.2 \u2014 FM-1 emulator",
   "short_name": "ORBIT",
-  "description": "ORBIT 0.8.1 FM-1 groovebox firmware running in the browser.",
+  "description": "ORBIT 0.8.2 FM-1 groovebox firmware running in the browser.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",

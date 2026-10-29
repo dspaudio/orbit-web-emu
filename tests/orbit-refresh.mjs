@@ -50,22 +50,17 @@ assert.notDeepEqual(track, pans, '기존 TRACK 페이지에 접근');
 t.enc(0, -9);
 assert.notDeepEqual(t.frame(), track, 'LEVEL 페이지로 복귀');
 
-// MASTER가 0이어도 stereo visualizer는 실제 pre-master C tap을 사용한다.
+// ORBIT 0.8.2: the visualizer is gone; HOME on Tape stays on Tape, and MASTER 0 still silences the real output.
 const s = boot();
 s.button(2);
 for (let enc = 2; enc < 6; enc++) s.enc(enc, -127);
 s.button(8); s.button(7); s.enc(0, 1); s.enc(2, 127);
 s.button(8);
-for (let style = 0; style < 3; style++) s.enc(0, 1);
+const tape = s.frame(); s.button(8);
+assert.deepEqual(s.frame(), tape, 'HOME on Tape stays on Tape (no visualizer)');
 s.e.emu_adc_set(4, 0); s.e.emu_input(1 << 7, 0); s.pump(240);
 const audio = new Float32Array(s.e.memory.buffer, s.e.emu_audio_ptr(), 256);
 assert(audio.every(v => v === 0), 'MASTER 0의 실제 출력은 무음');
-const fb = s.frame();
-const green = [[10, 66, 38], [20, 136, 76], [30, 204, 112]].map(([r, g, b]) => ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
-const points = [];
-for (let y = 30; y < 210; y++) for (let x = 30; x < 210; x++) if (green.includes(fb[y * 240 + x])) points.push([x, y]);
-assert(points.length > 8, 'pre-master tap의 실제 lissajous 도해');
-assert(points.filter(([x, y]) => x < 118 && y < 118).length > 5, '오른쪽 pan의 실제 tap은 lissajous 왼쪽 위 사분면에도 그려진다');
 // ORBIT 상단 우측 배터리: Tape, sound, mixer 헤더의 실제 framebuffer 픽셀을 확인한다.
 // 외곽선과 막대 슬롯은 팔레트와 무관하게 검은 배경이 아닌지로 판정한다.
 function battery(fb, bars) {
@@ -82,4 +77,4 @@ for (const press of [null, 6, 7]) {
   b.e.emu_adc_set(3, 800); settle(b, 300); battery(b.frame(), 3);
 }
 
-console.log(JSON.stringify({result: 'PASS', modules: 4, mixerPages: 3, stereoPreMasterTap: true, batteryPages: 3}));
+console.log(JSON.stringify({result: 'PASS', modules: 4, mixerPages: 3, homeStaysOnTape: true, master0Silent: true, batteryPages: 3}));

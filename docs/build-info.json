@@ -1,6 +1,6 @@
 {
-  "firmware": "ORBIT 0.8.1",
+  "firmware": "ORBIT 0.8.2",
   "source": "https://github.com/dspaudio/orbit",
-  "source_checkout_commit": "514eb60ee5cbd697a11954b9cc333291c0b7f719",
-  "published_source_commit": "514eb60ee5cbd697a11954b9cc333291c0b7f719"
+  "source_checkout_commit": "5824b5b8be65f2c54fcb1087ef869101708a90e3",
+  "published_source_commit": "5824b5b8be65f2c54fcb1087ef869101708a90e3"
 }

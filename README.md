@@ -1,27 +1,29 @@
 # ORBIT web emulator
 
-Run **ORBIT 0.8.1** in the browser using the actual C firmware compiled to
+Run **ORBIT 0.8.2** in the browser using the actual C firmware compiled to
 WebAssembly inside an AudioWorklet.
 
 **Try it online:** https://dspaudio.github.io/orbit-web-emu/
 
-ORBIT 0.8.1 is the only available firmware. There is no firmware selector;
+ORBIT 0.8.2 is the only available firmware. There is no firmware selector;
 old URL parameters and saved firmware preferences cannot select SLOOP,
 Felucca or an older ORBIT version. Existing ORBIT browser storage retains
 its namespace.
 
 ## Firmware
 
-`ORBIT_REVISION` pins the [ORBIT 0.8.1 source](https://github.com/dspaudio/orbit/tree/514eb60ee5cbd697a11954b9cc333291c0b7f719).
+`ORBIT_REVISION` pins the [ORBIT 0.8.2 source](https://github.com/dspaudio/orbit/tree/5824b5b8be65f2c54fcb1087ef869101708a90e3).
 The compiled module contains the real sequencer, synthesis engines,
 effects, storage readers and 240-by-240 display renderer. `build-info.json`
 records the source revision used for the build.
 
-This update includes SAMPLE retrigger fades, drum voice allocation,
-live-held POLY note protection, MIDI overflow recovery, clock averaging
-and the 350 ms layer-page hold behavior. The browser MIDI entry now uses
-the firmware's queue parser. Hardware-only USB rescue and IRQ behavior
-are not emulated.
+This update adds the delay **TYPE** (FX > DLY 2: MONO, WIDE or PING) and
+the 0.8.2 memory changes. The full-screen visualizer is gone: HOME on Tape
+stays on Tape. Earlier 0.8.1 behavior (SAMPLE retrigger fades, drum voice
+allocation, live-held POLY protection, MIDI overflow recovery, clock
+averaging, 350 ms layer pages) is unchanged. The browser MIDI entry uses
+the firmware's queue parser. Hardware-only USB rescue and IRQ behavior are
+not emulated.
 
 The default engine registry has 17 engines and 189 factory sounds.
 ORP8 projects and OPB3 USER banks use the firmware's compatibility readers.
@@ -58,6 +60,7 @@ node tests/orbit-lfo.mjs
 node tests/orbit-2.4.mjs
 node tests/orbit-refresh.mjs
 node tests/orbit-only.mjs
+node tests/orbit-delay.mjs
 cp dist/orbit.wasm dist/*.js dist/*.html dist/*.png dist/*.webmanifest dist/build-info.json docs/
 ```
 
@@ -67,8 +70,9 @@ binaries are not part of this application.
 
 ## Controls
 
-- **HOME:** Event Tape; press again for Visualizer.
-- **EDIT / ENV / FX / LFO:** synth modules and parameter pages.
+- **HOME:** Event Tape (0.8.2 has no visualizer).
+- **EDIT / ENV / FX / LFO:** synth modules and parameter pages. FX > DLY 2
+  sets the delay TYPE.
 - **Track 4 + EDIT:** drum controls. **GLO on Tape:** Mixer.
 - **Tape:** KNOB1 sets the head, KNOB2/3 select the region and KNOB4 chooses
   COPY or LIFT. Hold SEL and press OCT- to capture; SEL + OCT+ drops.
@@ -81,7 +85,7 @@ binaries are not part of this application.
   Space = PLAY, R = REC, arrows = SELECT/ALGORITHM.
 - Click or touch the keybed to play. Drag or scroll knobs to change values.
 
-See the [firmware user guide](https://github.com/dspaudio/orbit/blob/v0.8.1/GUIDE.md)
+See the [firmware user guide](https://github.com/dspaudio/orbit/blob/v0.8.2/GUIDE.md)
 for the full workflow.
 
 ## Storage and limitations
@@ -99,29 +103,28 @@ matrix. Event Tape edits sequencer events, not recorded PCM audio.
 
 The tests exercise self-contained Wasm boot, finite non-silent PCM,
 panel input, recording and playback, flash save/reboot, LFO modulation,
-FM6, UI modules, stereo scope taps and the simulated battery. They do not
+FM6, UI modules, the delay TYPE's stereo output and the simulated battery. They do not
 prove FM-1 hardware timing, stack usage or power-loss recovery.
 
-## Validation, October 28, 2026
+## Validation, October 29, 2026
 
-- Built with clang/LLD 23.1.3 from the pinned ORBIT 0.8.1 revision.
-  The Wasm module is 1,169,639 bytes with no external imports.
-- All six firmware/worklet regression programs passed. The former demo
-  test now records a real free take, and LFO testing follows SOURCE,
-  SYNC and DEST through the actual panel inputs.
+- Built with clang/LLD 23.1.3 from the pinned ORBIT 0.8.2 revision.
+  The Wasm module is 1,135,338 bytes with no external imports.
+- All eight firmware/worklet/frontend regression programs passed,
+  including the new `orbit-delay.mjs`: through the real panel (FX, KNOB3
+  send, SELECT to DLY 2, KNOB1), PING spreads the same note's echoes to the
+  sides of the real output while MONO keeps them centred. HOME on Tape
+  stays on Tape.
 - The ORBIT-only frontend regression passed 16 URL/preference
   combinations, power gating and persistent ORBIT flash read/write.
-- Local browser checks at 1440px and 390px rendered the real firmware.
-  A legacy `?fw=sloop` URL and a saved Felucca preference still loaded
-  only ORBIT 0.8.1 without clearing the preference or ORBIT storage.
-- Real AudioWorklet output was finite stereo PCM at 44.1 kHz, with a
-  measured note peak of 0.461761. The compact layout had no horizontal
-  document overflow.
+- Headless WebKit at 1440px powered on the page (AudioWorklet running),
+  reached FX > DLY 2 and showed TYPE PING; at 390px the page fitted
+  without horizontal overflow.
 
 Module SHA-256:
 
 ```text
-c39e6d378a10b4f4db4996d7f38bd29221a5d1c547c9da2b7ff2a25a3de7a7e3
+406d0bb82cfc44dc205f41574012109f34ad32b7f840da66a06e93f1f4e04ec4
 ```
 
 ## Origin and licensing
@@ -134,4 +137,4 @@ retained. The original README is preserved in
 
 ORBIT derives from SLOOP/Felucca. Software is GPL-3.0-only; existing
 firmware asset notices and rights remain in the
-[source repository](https://github.com/dspaudio/orbit/blob/v0.8.1/LICENSING.md).
+[source repository](https://github.com/dspaudio/orbit/blob/v0.8.2/LICENSING.md).

@@ -113,8 +113,8 @@ for (const stored of ['sloop', 'felucca', 'orbit', null]) {
 
         // Then only ORBIT boots, using the existing ORBIT flash and cache keys.
         assert.equal(requests[0].split('?')[0], 'orbit.wasm', `stored=${stored}, URL=${search}`);
-        assert.deepEqual(requests, ['orbit.wasm?v=0.8.1-514eb60']);
-        assert.deepEqual(modules, ['worklet.js?v=0.8.1-514eb60']);
+        assert.deepEqual(requests, ['orbit.wasm?v=0.8.2-5824b5b']);
+        assert.deepEqual(modules, ['worklet.js?v=0.8.2-5824b5b']);
         assert.equal(processor.options.processorOptions.wasmBytes, wasmBytes);
         assert.equal(processor.options.processorOptions.flashImage, originalFlash.get('image-orbit'));
         assert.deepEqual(reads, ['image-orbit']);

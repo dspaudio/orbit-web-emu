@@ -38,7 +38,4 @@ const flash = new Uint8Array(t.e.memory.buffer, t.e.emu_flash_ptr(), t.e.emu_fla
 assert(t.e.emu_flash_gen() > 0, '설정이 플래시에 기록');
 const restored = boot(flash); restored.button(8, 420);
 assert(restored.frame().equals(mono), '재부팅 후 MONO 메뉴 화면 복원');
-restored.button(0); restored.button(8);
-const visualizer = restored.frame(); restored.enc(0, 1);
-assert(!restored.frame().equals(visualizer), 'SELECT가 Visualizer 종류 변경');
-console.log(JSON.stringify({result: 'PASS', fm6Peaks: peaks, stylePersistence: true, visualizerSelection: true}));
+console.log(JSON.stringify({result: 'PASS', fm6Peaks: peaks, stylePersistence: true}));
