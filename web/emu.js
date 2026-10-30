@@ -7,6 +7,20 @@
  * case's top-left corner, case = 963 x 588, scaled by S. */
 'use strict';
 
+const BLE_SOUND = new URLSearchParams(location.search).get('version') === '0.9.B';
+const FIRMWARE_VERSION = BLE_SOUND ? '0.9.B' : '0.9.0';
+const WASM_FILE = BLE_SOUND ? 'orbit-ble.wasm' : 'orbit.wasm';
+const versionSelect = document.getElementById('firmware-version');
+versionSelect.value = FIRMWARE_VERSION;
+document.getElementById('version-label').textContent = FIRMWARE_VERSION;
+document.title = `ORBIT ${FIRMWARE_VERSION} — FM-1 emulator`;
+document.getElementById('version-description').textContent = BLE_SOUND
+    ? '0.9.B sound: FM melodic replacements, original drum samples, shorter delay. Bluetooth radio is not emulated.'
+    : '0.9.0 sound: original melodic and drum samples, full-length delay.';
+versionSelect.addEventListener('change', () => {
+    location.assign('?version=' + encodeURIComponent(versionSelect.value));
+});
+
 const S = 1.25;                          // px per drawing unit
 const DEV = { w: 963, h: 588 };
 
@@ -209,6 +223,7 @@ KEYENC['\\'] = [6, 1];
 
 const heldKeys = new Set();
 window.addEventListener('keydown', ev => {
+    if (ev.target === versionSelect) return;
     if (ev.repeat) { if (ev.key in KEYENC && KEYENC[ev.key]) { enc(...KEYENC[ev.key]); } ev.preventDefault(); return; }
     const k = ev.key.toLowerCase();
     if (k in KEYNOTES) { heldKeys.add(k); noteDown(KEYNOTES[k]); ev.preventDefault(); }
@@ -272,7 +287,7 @@ function idb() {
         r.onerror = () => rej(r.error);
     });
 }
-const FLASH_KEY = 'image-orbit';
+const FLASH_KEY = BLE_SOUND ? 'image-orbit-0.9.B' : 'image-orbit';
 async function loadFlash() {
     try {
         const db = await idb();
@@ -295,9 +310,9 @@ async function saveFlash(buf) {
 async function powerOn() {
     document.getElementById('power').remove();
     ctx = new AudioContext({ sampleRate: 44100, latencyHint: 'interactive' });
-    await ctx.audioWorklet.addModule('worklet.js?v=0.8.2-5824b5b');
+    await ctx.audioWorklet.addModule('worklet.js?v=0.9-dual');
     const [wasmBytes, flashImage] = await Promise.all([
-        (await fetch('orbit.wasm?v=0.8.2-5824b5b')).arrayBuffer(),
+        (await fetch(WASM_FILE + '?v=0.9-dual')).arrayBuffer(),
         loadFlash(),
     ]);
     node = new AudioWorkletNode(ctx, 'sloop', {
@@ -437,8 +452,8 @@ function fitDevice() {
        side notch in landscape), but flush with the bottom edge — the home
        indicator floats translucently over the keys */
     const si = safeInsets();
-    const ax = si.l, ay = si.t;
-    const aw = vw - si.l - si.r, ah = vh - si.t;
+    const ax = si.l, ay = si.t + 64;              // compact firmware selector stays above the instrument
+    const aw = vw - si.l - si.r, ah = vh - si.t - 64;
     const sFlat = Math.min(aw / W, ah / H);        // uniform, as-is
     const sRot = Math.min(aw / H, ah / W);         // uniform, rotated 90°
     if (sFlat >= 1) {                              // fits at full size: normal page

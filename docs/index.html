@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ORBIT 0.8.2 — FM-1 emulator</title>
-<link rel="manifest" href="manifest.webmanifest?v=0.8.2-5824b5b">
+<title>ORBIT 0.9 — FM-1 emulator</title>
+<link rel="manifest" href="manifest.webmanifest?v=0.9-dual">
 <meta name="theme-color" content="#101114">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,6 +32,11 @@ body { display: flex; flex-direction: column; align-items: center; padding: 18px
 h1 { font-size: 15px; letter-spacing: 3px; color: var(--dim); margin-bottom: 12px; font-weight: normal; }
 h1 b { color: var(--txt); }
 h1 .orbit-mark { font-family: system-ui, sans-serif; font-weight: 100; }
+.version-controls { width: min(100%, 720px); margin-bottom: 16px; text-align: center; }
+.version-controls label { display: inline-block; margin-right: 8px; font-size: 14px; }
+.version-controls select { min-height: 44px; padding: 8px 12px; background: #24272c; color: var(--txt); border: 1px solid var(--dim); border-radius: 6px; font: inherit; }
+.version-controls select:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.version-controls p { font-size: 14px; line-height: 1.5; margin-top: 8px; }
 
 /* the device: every control is absolutely positioned from the FM-1 user
    manual's panel drawing (page 1), normalized to the case outline */
@@ -130,6 +135,10 @@ body.compact .cap .grab { display: block; }
 /* compact mode (phones / small windows): the device is scaled — and in
    portrait rotated 90° — to fill the viewport; emu.js sets the transform */
 body.compact { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+body.compact .version-controls { position: fixed; z-index: 21; top: env(safe-area-inset-top, 0px); left: 0; width: 100%; height: 64px; margin: 0; padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #101114; }
+body.compact .version-controls p { display: none; }
+body.compact .version-controls label { margin: 0; font-size: 12px; }
+body.compact .version-controls select { min-width: 0; max-width: 70%; font-size: 14px; }
 body.compact h1, body.compact #help { display: none; }
 body.compact #device { position: fixed; left: 50%; top: 50%; }
 
@@ -146,7 +155,7 @@ body.compact #device { position: fixed; left: 50%; top: 50%; }
     box-shadow: 0 2px 8px rgba(0,0,0,.45);
 }
 #fs:active { background: rgba(52, 56, 63, .85); }
-body.compact.fs-ok #fs { display: flex; }
+body.compact.fs-ok #fs { display: flex; top: calc(env(safe-area-inset-top, 0px) + 68px); }
 
 /* iOS tip overlay (no Fullscreen API on iPhone → Add to Home Screen) */
 #fstip {
@@ -256,7 +265,16 @@ body.compact #manual { display: none; }
 </style>
 </head>
 <body>
-<h1 id="title"><b class="orbit-mark">Orbit</b> 0.8.2 &middot; M-VAVE FM-1 &middot; browser emulator</h1>
+<h1 id="title"><b class="orbit-mark">Orbit</b> <span id="version-label">0.9.0</span> &middot; M-VAVE FM-1 &middot; browser emulator</h1>
+<section class="version-controls" aria-label="Firmware sound comparison">
+    <label for="firmware-version">Firmware sound</label>
+    <select id="firmware-version">
+        <option value="0.9.0">0.9.0 — original samples</option>
+        <option value="0.9.B">0.9.B — FM replacements</option>
+    </select>
+    <p id="version-description">0.9.0 sound: original melodic and drum samples, full-length delay.</p>
+    <p>Changing version reloads the instrument and stops audio. Each version keeps separate browser saves.</p>
+</section>
 
 <button id="fs" aria-label="Toggle fullscreen" title="Fullscreen">&#x26F6;</button>
 
@@ -267,7 +285,7 @@ body.compact #manual { display: none; }
 </div></div>
 
 <div id="device">
-    <div id="power"><div class="ring">&#x23FB;</div><span>POWER ON</span><small>runs the real ORBIT 0.8.2 firmware, compiled to WebAssembly &middot; sound on</small></div>
+    <div id="power"><div class="ring">&#x23FB;</div><span>POWER ON</span><small>runs the selected ORBIT firmware sound engine, compiled to WebAssembly &middot; sound on</small></div>
 </div>
 
 <section id="manual">
@@ -300,7 +318,7 @@ body.compact #manual { display: none; }
 </div>
 
 <div id="man-orbit">
-<h2>ORBIT 0.8.2 · HOW TO PLAY</h2>
+<h2>ORBIT 0.9 · HOW TO PLAY</h2>
 <p class="lead">Three synth tracks and a drum machine, running the actual FM-1 firmware in WebAssembly. HOME opens Event Tape: an editor for sequencer notes and drum events, not an audio tape recorder.</p>
 <div class="cards">
 <div class="card">
@@ -388,6 +406,6 @@ body.compact #manual { display: none; }
     more FM-1 tools: <a href="https://quixotic7.github.io/MvaveFM1-Designer/" target="_blank" rel="noopener">ChoralRoot FM-1 designer</a> — paint LED states, relabel controls and mock up 240&times;240 screens for your own firmware layouts (by <a href="https://github.com/Quixotic7/MvaveFM1-Designer" target="_blank" rel="noopener">Quixotic7</a>, MIT)
 </div>
 
-<script src="emu.js?v=0.8.2-5824b5b"></script>
+<script src="emu.js?v=0.9-dual-r2"></script>
 </body>
 </html>

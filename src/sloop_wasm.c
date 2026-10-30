@@ -18,6 +18,22 @@
 
 #define WASM_EXPORT(n) __attribute__((export_name(n), used))
 
+#if ORBIT_BLE
+#include "ble/ble_api.h"
+/* Sound-only BLE variant: no vendor SDK, RF, pairing or Bluetooth MIDI.
+ * Keep the firmware menu API honest even if the user tries to start it. */
+static uint8_t emu_radio_requested;
+void ble_user_start(void) { emu_radio_requested = 1; }
+void ble_user_stop(void) { emu_radio_requested = 0; }
+void ble_service(void) {}
+ble_status_t ble_get_status(void) { return emu_radio_requested ? BLE_STATUS_FAILED : BLE_STATUS_OFF; }
+const char *ble_last_error(uint32_t *code) { *code = 0; return "NO BROWSER RADIO"; }
+void ble_midi_out_pkt(uint32_t pkt) { (void)pkt; }
+int ble_midi_take(uint32_t *pkt) { (void)pkt; return 0; }
+uint32_t ble_midi_rx_drops(void) { return 0; }
+uint32_t ble_midi_tx_drops(void) { return 0; }
+#endif
+
 /* ------------------------------------------------------------- time HAL --- */
 #define FM1_TICKS_PER_US 24u
 static uint64_t emu_samples;                   /* total frames rendered */
@@ -339,6 +355,9 @@ WASM_EXPORT("emu_frame") void emu_frame(void)   /* the main loop's UI pass */
         song.batt_raw = song.batt_raw ? song.batt_raw + (b - song.batt_raw) / 32 : b;
     }
     ui_input();
+#if ORBIT_BLE
+    orbit_ble_bridge_service();
+#endif
     ui_leds();
     ui_draw();
     autosave_tick();
@@ -403,3 +422,39 @@ WASM_EXPORT("emu_led_dim_ptr") uint32_t emu_led_dim_ptr(void) { return (uint32_t
 WASM_EXPORT("emu_flash_ptr") uint32_t emu_flash_ptr(void) { return (uint32_t)(uintptr_t)emu_flash; }
 WASM_EXPORT("emu_flash_size") uint32_t emu_flash_size(void) { return EMU_FLASH_SIZE; }
 WASM_EXPORT("emu_flash_gen") uint32_t emu_flash_gen_get(void) { return emu_flash_gen; }
+
+/* Read-only firmware identity and sound inventory for packaging and regression checks. */
+WASM_EXPORT("emu_version") const char *emu_version(void) { return FELUCCA_VERSION; }
+WASM_EXPORT("emu_engine_count") uint32_t emu_engine_count(void) { return NENGINES; }
+WASM_EXPORT("emu_engine_name") const char *emu_engine_name(uint32_t e)
+{
+    return e < NENGINES ? ENGINES[e]->name : "";
+}
+WASM_EXPORT("emu_preset_count") uint32_t emu_preset_count(uint32_t e)
+{
+    return e < NENGINES ? ENGINES[e]->npresets : 0;
+}
+WASM_EXPORT("emu_preset_name") const char *emu_preset_name(uint32_t e, uint32_t p)
+{
+    return e < NENGINES && p < ENGINES[e]->npresets ? ENGINES[e]->presets[p].name : "";
+}
+WASM_EXPORT("emu_selected_engine") uint32_t emu_selected_engine(void) { return trk[0].engine; }
+WASM_EXPORT("emu_selected_preset") uint32_t emu_selected_preset(void) { return trk[0].preset; }
+WASM_EXPORT("emu_delay_length") uint32_t emu_delay_length(void) { return DLY_LEN; }
+WASM_EXPORT("emu_radio_status") const char *emu_radio_status(void)
+{
+#if ORBIT_BLE
+    return orbit_ble_status();
+#else
+    return "UNAVAILABLE";
+#endif
+}
+/* PERC is the final built-in set; compare its ADPCM payload, not effects output. */
+WASM_EXPORT("emu_perc_ptr") const uint8_t *emu_perc_ptr(void)
+{
+    return SMP_DATA + SMP_ZONES[SMP_SETS[SMP_NSETS - 1u].z0].off;
+}
+WASM_EXPORT("emu_perc_size") uint32_t emu_perc_size(void)
+{
+    return sizeof SMP_DATA - (uint32_t)(emu_perc_ptr() - SMP_DATA);
+}

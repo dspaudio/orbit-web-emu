@@ -22,16 +22,21 @@ class Element {
 }
 
 for (const stored of ['sloop', 'felucca', 'orbit', null]) {
-    for (const search of ['', '?fw=sloop', '?fw=felucca', '?fw=orbit']) {
+    for (const search of ['', '?fw=sloop', '?fw=felucca', '?fw=orbit',
+        '?version=0.9.0', '?version=0.9.B', '?version=0.8.2', '?fw=sloop&version=0.9.B']) {
+        const ble = new URLSearchParams(search).get('version') === '0.9.B';
+        const flashKey = ble ? 'image-orbit-0.9.B' : 'image-orbit';
+        const wasmFile = ble ? 'orbit-ble.wasm' : 'orbit.wasm';
         // Given a legacy URL/preference and distinct saved flash images.
         const elements = new Map([...html.matchAll(/\bid="([^"]+)"/g)].map((m) => [m[1], new Element()]));
         const flash = new Map(['orbit', 'sloop', 'felucca'].map((fw, i) => ['image-' + fw, Uint8Array.of(i + 1).buffer]));
         flash.set('image', Uint8Array.of(4).buffer);
+        flash.set('image-orbit-0.9.B', Uint8Array.of(5).buffer);
         const originalFlash = new Map(flash);
         const storage = new Map(stored === null ? [] : [['orbit-emu-fw', stored]]);
         const reads = [], writes = [], requests = [], modules = [], messages = [], timers = [];
         const wasmBytes = Uint8Array.of(0, 97, 115, 109).buffer;
-        let processor, contexts = 0, resolveSave;
+        let processor, contexts = 0, resolveSave, navigated;
         const saved = new Promise(resolve => { resolveSave = resolve; });
         const window = new Element();
         Object.assign(window, {
@@ -94,7 +99,7 @@ for (const stored of ['sloop', 'felucca', 'orbit', null]) {
         }
         vm.runInNewContext(source, {
             document, window, navigator: window.navigator, indexedDB, AudioContext, AudioWorkletNode,
-            location: { search, href: 'https://example.test/' + search },
+            location: { search, href: 'https://example.test/' + search, assign: url => { navigated = url; } },
             URLSearchParams,
             localStorage: {
                 getItem: key => storage.get(key) ?? null,
@@ -112,12 +117,11 @@ for (const stored of ['sloop', 'felucca', 'orbit', null]) {
         await elements.get('power').events.get('click')();
 
         // Then only ORBIT boots, using the existing ORBIT flash and cache keys.
-        assert.equal(requests[0].split('?')[0], 'orbit.wasm', `stored=${stored}, URL=${search}`);
-        assert.deepEqual(requests, ['orbit.wasm?v=0.8.2-5824b5b']);
-        assert.deepEqual(modules, ['worklet.js?v=0.8.2-5824b5b']);
+        assert.equal(requests[0].split('?')[0], wasmFile, `stored=${stored}, URL=${search}`);
+        assert.equal(modules[0].split('?')[0], 'worklet.js');
         assert.equal(processor.options.processorOptions.wasmBytes, wasmBytes);
-        assert.equal(processor.options.processorOptions.flashImage, originalFlash.get('image-orbit'));
-        assert.deepEqual(reads, ['image-orbit']);
+        assert.equal(processor.options.processorOptions.flashImage, originalFlash.get(flashKey));
+        assert.deepEqual(reads, [flashKey]);
         assert.equal(contexts, 1);
         assert.equal(elements.get('power').removed, true);
         assert.equal(messages[0].t, 'adc');
@@ -131,11 +135,24 @@ for (const stored of ['sloop', 'felucca', 'orbit', null]) {
         await saved;
 
         // Then persistence changes only the ORBIT image, without resetting preferences.
-        assert.deepEqual(writes, ['image-orbit']);
-        assert.equal(flash.get('image-orbit'), updated);
-        for (const key of ['image-sloop', 'image-felucca', 'image'])
-            assert.equal(flash.get(key), originalFlash.get(key));
+        assert.deepEqual(writes, [flashKey]);
+        assert.equal(flash.get(flashKey), updated);
+        for (const key of originalFlash.keys())
+            if (key !== flashKey) assert.equal(flash.get(key), originalFlash.get(key));
         assert.equal(storage.get('orbit-emu-fw') ?? null, stored);
+        const selector = elements.get('firmware-version');
+        let prevented = false;
+        window.events.get('keydown')({ target: selector, key: 'ArrowDown', preventDefault: () => { prevented = true; } });
+        assert.equal(prevented, false, 'Version selector retains native keyboard navigation');
+        selector.value = ble ? '0.9.0' : '0.9.B';
+        selector.events.get('change')();
+        assert.equal(navigated, '?version=' + selector.value);
+        // Given a compact viewport, the instrument must leave the selector's top strip free.
+        window.innerWidth = 390;
+        window.innerHeight = 844;
+        window.events.get('resize')();
+        assert.equal(parseFloat(elements.get('device').style.top), 454,
+            'Compact instrument is centered below the 64px version selector');
     }
 }
-console.log('ORBIT-only frontend: PASS (16 URL/preference combinations, power gate, flash read/write)');
+console.log('ORBIT variants frontend: PASS (32 URL/preference combinations, power gate, isolated saves, keyboard selection)');

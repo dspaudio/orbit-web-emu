@@ -1,6 +1,29 @@
 {
-  "firmware": "ORBIT 0.8.2",
+  "firmware": "ORBIT 0.9.0",
   "source": "https://github.com/dspaudio/orbit",
-  "source_checkout_commit": "5824b5b8be65f2c54fcb1087ef869101708a90e3",
-  "published_source_commit": "5824b5b8be65f2c54fcb1087ef869101708a90e3"
+  "source_checkout_commit": "8beb42505f4e263b20df0bb7b0e38f1861131f42",
+  "published_source_commit": "8beb42505f4e263b20df0bb7b0e38f1861131f42",
+  "dirty": false,
+  "local_development": false,
+  "default_variant": "orbit",
+  "variants": {
+    "orbit": {
+      "firmware": "ORBIT 0.9.0",
+      "version": "0.9.0",
+      "file": "orbit.wasm",
+      "orbit_ble": false,
+      "radio_emulated": false,
+      "sha256": "476e09c00d5f35ca16a0e2754a7bee0d5ebc20ba90720906ed2d8be21e2e7e19",
+      "bytes": 1151374
+    },
+    "orbit-ble": {
+      "firmware": "ORBIT 0.9.B",
+      "version": "0.9.B",
+      "file": "orbit-ble.wasm",
+      "orbit_ble": true,
+      "radio_emulated": false,
+      "sha256": "4e8a7ab460725be58a26dd009c30dac34850ddd7bfdb572ed3c5146e4a04e5cd",
+      "bytes": 920528
+    }
+  }
 }
