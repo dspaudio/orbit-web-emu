@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ORBIT 0.9 — FM-1 emulator</title>
-<link rel="manifest" href="manifest.webmanifest?v=0.9-dual">
+<title>ORBIT 0.10 - FM-1 emulator</title>
+<link rel="manifest" href="manifest.webmanifest?v=0.10-dual">
 <meta name="theme-color" content="#101114">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -265,14 +265,14 @@ body.compact #manual { display: none; }
 </style>
 </head>
 <body>
-<h1 id="title"><b class="orbit-mark">Orbit</b> <span id="version-label">0.9.0</span> &middot; M-VAVE FM-1 &middot; browser emulator</h1>
+<h1 id="title"><b class="orbit-mark">Orbit</b> <span id="version-label">0.10.0</span> &middot; M-VAVE FM-1 &middot; browser emulator</h1>
 <section class="version-controls" aria-label="Firmware sound comparison">
     <label for="firmware-version">Firmware sound</label>
     <select id="firmware-version">
-        <option value="0.9.0">0.9.0 — original samples</option>
-        <option value="0.9.B">0.9.B — FM replacements</option>
+        <option value="0.10.0">0.10.0 - original samples</option>
+        <option value="0.10.B">0.10.B - FM replacements</option>
     </select>
-    <p id="version-description">0.9.0 sound: original melodic and drum samples, full-length delay.</p>
+    <p id="version-description">0.10.0 sound: original melodic and drum samples, full-length delay.</p>
     <p>Changing version reloads the instrument and stops audio. Each version keeps separate browser saves.</p>
 </section>
 
@@ -318,7 +318,7 @@ body.compact #manual { display: none; }
 </div>
 
 <div id="man-orbit">
-<h2>ORBIT 0.9 · HOW TO PLAY</h2>
+<h2>ORBIT 0.10 · HOW TO PLAY</h2>
 <p class="lead">Three synth tracks and a drum machine, running the actual FM-1 firmware in WebAssembly. HOME opens Event Tape: an editor for sequencer notes and drum events, not an audio tape recorder.</p>
 <div class="cards">
 <div class="card">
@@ -351,7 +351,8 @@ body.compact #manual { display: none; }
 </div>
 <div class="card">
 <h3>DRUM GRID AND KIT</h3>
-<p>On track 4, tap SEQ or EDIT from Tape/Mixer for DRUMS; tap again to switch GRID / KIT, or turn SELECT left/right. In GRID, black keys select voices and white keys toggle that voice's steps. OCT−/OCT+ change 16-step pages.</p>
+<p>On track 4, tap SEQ or EDIT from Tape/Mixer for DRUMS; tap again to switch GRID / KIT, or turn SELECT left/right. In GRID, white keys toggle the selected voice's steps silently; hits sound only when the playhead reaches them. KNOB 1 selects a voice and KNOB 2 moves the step cursor silently too. OCT-/OCT+ change 16-step pages.</p>
+<p>Black keys select and audition voices. With REC on while playing, a black key also records its voice live; white keys keep editing silently. KNOB 1 reaches all 16 voices; only 11 have black keys, so use KIT to play the other five live.</p>
 <p>KIT is the live-pad view. For live drums, hold ARP and a drum key for a roll; hold OCT−/OCT+ with a hit for ghost/hard levels.</p>
 </div>
 <div class="card">
@@ -376,12 +377,22 @@ body.compact #manual { display: none; }
 <p>Stopped: SAVE + white keys 5–8 stores sections A–D; repeat to confirm an overwrite. SAVE + keys 1–4 recalls them, at the next bar while playing. Tap several while holding SAVE for a chain. SAVE on Tape opens SONG.</p>
 </div>
 <div class="card">
+<h3>MIDI CLOCK AND CONTROLLER</h3>
+<p>On FM-1 hardware, GLO &gt; SYSTEM &gt; SYNC = OUT sends MIDI clock at 24 pulses per quarter note with START/STOP over USB MIDI, and over Bluetooth MIDI in 0.10.B. INT sends no clock; USB and TRS follow incoming clock. This browser emulator has MIDI note input, but no MIDI output or clock sync with external devices.</p>
+<p>Tap OCT- and OCT+ together on the play screen to toggle controller mode: press both at once and release within about half a second, with no other button or key. On a computer, tap Z + X together. This replaces the two-second ENV + LFO hold; MENU &gt; AUDIO &gt; CONTROLLER still works. Leave controller mode to hear internal notes.</p>
+</div>
+<div class="card">
+<h3>0.10.B SOUND AND BLUETOOTH</h3>
+<p>The 0.10.B sound build uses FM melodic replacements, the original PERC drums and a shorter delay. On hardware, 0.10.B adds Bluetooth MIDI and can start the radio with recovery values when other firmware has erased the stock calibration. Those values are not calibrated for each unit.</p>
+<p>The browser compares the firmware sounds only. Bluetooth and radio recovery are not emulated; enabling Bluetooth here reports FAILED: NO BROWSER RADIO.</p>
+</div>
+<div class="card">
 <h3>PROJECTS AND EXISTING AUTOSAVE</h3>
 <p>Open an editing page, tap SAVE, then turn SELECT for USER / PROJECT / TOOLS. PROJECT has four slots: KNOB1 selects, KNOB2 erases, KNOB3 loads and KNOB4 saves. Actions require confirmation and flash writes require stopped playback.</p>
 <p>There is no built-in demo-song loader or DEMO SONG menu. Earlier patterns may return from your existing autosave; the update does not clear them. To start empty, first save anything you want to keep, stop, open SAVE &gt; TOOLS and confirm KNOB4 NEW (NEW PROJECT). Leave playback stopped for autosave; saved sections are separate.</p>
 </div>
 </div>
-<p class="src">Controls follow the <a href="https://github.com/dspaudio/orbit/blob/5824b5b8be65f2c54fcb1087ef869101708a90e3/GUIDE.md" target="_blank" rel="noopener">ORBIT user guide</a> and <a href="https://github.com/dspaudio/orbit/blob/5824b5b8be65f2c54fcb1087ef869101708a90e3/README.md" target="_blank" rel="noopener">source overview</a>. Emulator fork: <a href="https://github.com/sabliran/sloop-web-emu" target="_blank" rel="noopener">sabliran/sloop-web-emu</a>.</p>
+<p class="src">Controls follow the <a href="https://github.com/dspaudio/orbit/blob/055a44d8e771940aedbabf0c64a061fc7caf173c/GUIDE.md" target="_blank" rel="noopener">ORBIT user guide</a> and <a href="https://github.com/dspaudio/orbit/blob/055a44d8e771940aedbabf0c64a061fc7caf173c/README.md" target="_blank" rel="noopener">source overview</a>. Emulator fork: <a href="https://github.com/sabliran/sloop-web-emu" target="_blank" rel="noopener">sabliran/sloop-web-emu</a>.</p>
 </div>
 
 <h2>IN THIS EMULATOR</h2>
@@ -406,6 +417,6 @@ body.compact #manual { display: none; }
     more FM-1 tools: <a href="https://quixotic7.github.io/MvaveFM1-Designer/" target="_blank" rel="noopener">ChoralRoot FM-1 designer</a> — paint LED states, relabel controls and mock up 240&times;240 screens for your own firmware layouts (by <a href="https://github.com/Quixotic7/MvaveFM1-Designer" target="_blank" rel="noopener">Quixotic7</a>, MIT)
 </div>
 
-<script src="emu.js?v=0.9-dual-r2"></script>
+<script src="emu.js?v=0.10-dual"></script>
 </body>
 </html>

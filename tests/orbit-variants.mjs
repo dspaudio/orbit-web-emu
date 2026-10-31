@@ -48,8 +48,8 @@ function boot(key, version) {
 }
 
 // Given fresh instances of both actual firmware variants.
-const normal = boot('orbit', '0.9.0');
-const ble = boot('orbit-ble', '0.9.B');
+const normal = boot('orbit', '0.10.0');
+const ble = boot('orbit-ble', '0.10.B');
 assert.equal(info.default_variant, 'orbit');
 assert.equal(info.variants.orbit.orbit_ble, false);
 assert.equal(info.variants['orbit-ble'].orbit_ble, true);

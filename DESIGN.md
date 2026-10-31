@@ -1,7 +1,7 @@
 # ORBIT Web Emulator
 
 ## 1. Identity
-The frontend offers ORBIT 0.9.0 (`orbit.wasm`) and the 0.9.B sound variant (`orbit-ble.wasm`). Keep the FM-1 faceplate and real C display. Only `?version=0.9.B` selects the alternate build; missing or unknown versions use 0.9.0. Legacy firmware preferences cannot select SLOOP/Felucca or older ORBIT versions.
+The frontend offers ORBIT 0.10.0 (`orbit.wasm`) and the 0.10.B sound variant (`orbit-ble.wasm`). Keep the FM-1 faceplate and real C display. Only `?version=0.10.B` selects the alternate build; missing or unknown versions use 0.10.0. Legacy firmware preferences cannot select SLOOP/Felucca or older ORBIT versions.
 
 ## 2. Color
 The K1-K4 pointers use `#287cff`, `#1ecc70`, `#ffffff` and `#ff621a`. The firmware C palette controls the display's PASTEL, NEON and monochrome settings.
@@ -21,7 +21,7 @@ HOME returns to Event Tape; the visualizer is removed. EDIT / ENV / FX / LFO ope
 Keep knob rotation and LCD updates. The AudioContext, firmware load and sound start behind POWER ON, through the existing AudioWorklet and splash timing.
 
 ## 7. Surface and Persistence
-Keep the existing shell, knob and bezel materials and depth. Preserve IndexedDB database `sloop-emu`, store `flash` and default key `image-orbit`; the BLE sound variant uses `image-orbit-0.9.B`. Neither variant overwrites the other's saves. Switching reloads the page and stops audio; POWER ON remains required. Retain the internal `sloop` worklet processor name. Use asset cache key `0.9-dual`.
+Keep the existing shell, knob and bezel materials and depth. Preserve IndexedDB database `sloop-emu`, store `flash` and default key `image-orbit`; 0.10.B retains the existing BLE sound save key `image-orbit-0.9.B`. Neither variant overwrites the other's saves. Switching reloads the page and stops audio; POWER ON remains required. Retain the internal `sloop` worklet processor name. Use asset cache key `0.10-dual`.
 
 ## 8. Verification and Limits
 The focused frontend test exercises legacy URL/stored choices, the POWER gate and ORBIT flash read/write without building Wasm. It is not browser QA. The lead owns Wasm integration and browser checks at 390px touch and 1440px desktop, including boot, display, panel input, audio and persistence. The existing dark-only shell and physical-panel accessibility constraints remain outside this update's redesign scope. Browser verification does not establish FM-1 hardware behavior or timing.

@@ -1,6 +1,6 @@
 # ORBIT web emulator
 
-Play and compare **ORBIT 0.9.0** and **ORBIT 0.9.B** using the actual C
+Play and compare **ORBIT 0.10.0** and **ORBIT 0.10.B** using the actual C
 firmware compiled to WebAssembly inside an AudioWorklet.
 
 **[Open the emulator](https://dspaudio.github.io/orbit-web-emu/)**
@@ -11,8 +11,8 @@ Choose **Firmware sound**, then press **POWER ON**:
 
 | Version | Module | Sound |
 | --- | --- | --- |
-| 0.9.0 | `orbit.wasm` | Original melodic samples and full-length delay |
-| 0.9.B | `orbit-ble.wasm` | FM melodic replacements and shorter delay; original PERC drums |
+| 0.10.0 | `orbit.wasm` | Original melodic samples and full-length delay |
+| 0.10.B | `orbit-ble.wasm` | FM melodic replacements and shorter delay; original PERC drums |
 
 Try SAMPLE presets **GRAND PNO**, **VIBES** and **UP BASS** in both versions.
 Names and engine IDs are preserved. PIANO uses a 3-operator FM tine voice;
@@ -21,12 +21,35 @@ noise/triangle sweep. GRAIN uses the corresponding sources too.
 See the [complete replacement list](https://github.com/dspaudio/orbit#sounds-replaced-in-the-bluetooth-build).
 
 Switching version reloads the instrument and stops audio. The default build
-keeps the existing ORBIT browser save; 0.9.B uses a separate save image.
-Direct links use `?version=0.9.0` or `?version=0.9.B`. Older firmware names
+keeps the existing ORBIT browser save; 0.10.B keeps the separate save image
+used by 0.9.B.
+Direct links use `?version=0.10.0` or `?version=0.10.B`. Older firmware names
 and unknown versions cannot select SLOOP, Felucca or an old ORBIT module.
 
-This is a **sound comparison**, not a Bluetooth emulator. The 0.9.B
+This is a **sound comparison**, not a Bluetooth emulator. The 0.10.B
 firmware menu reports `FAILED: NO BROWSER RADIO` if Bluetooth is enabled.
+
+## New in 0.10
+
+- **Quiet drum GRID editing:** white keys add or remove the selected voice's
+  hits silently, and KNOB 1/2 select the voice and step cursor silently.
+  Hits sound when the playhead reaches them. Black keys select and audition
+  voices; with REC on while playing, they also record their voice live.
+- **Controller shortcut:** tap OCT- + OCT+ together, releasing within about
+  half a second with no other button or key. On a computer, use Z + X.
+  This replaces the two-second ENV + LFO hold.
+  MENU > AUDIO > CONTROLLER still works.
+- **Hardware MIDI clock output:** GLO > SYSTEM > SYNC = OUT sends 24 pulses
+  per quarter note with START/STOP over USB MIDI, and Bluetooth MIDI in
+  0.10.B. The browser supports MIDI note input only, not MIDI output or
+  external clock sync.
+- **Hardware Bluetooth recovery:** 0.10.B can start Bluetooth using recovery
+  values when other firmware has erased the FM-1's stock radio calibration.
+  These values are not calibrated for each unit. Bluetooth and its recovery
+  path are not emulated here.
+
+See the [0.10.0 release notes](https://github.com/dspaudio/orbit/blob/main/docs/releases/0.10.0.md)
+and [0.10.B release notes](https://github.com/dspaudio/orbit/blob/main/docs/releases/0.10.B.md).
 
 ## Firmware and controls
 
@@ -44,7 +67,7 @@ projects and OPB3 USER banks. Optional SLICE is disabled.
 - REC arms recording; PLAY starts or stops the sequencer.
 - Keyboard: Z/X for OCT-/OCT+, 1-0 for function buttons, Space for PLAY,
   R for REC, arrows for SELECT/ALGORITHM. Click/touch the keys or turn knobs.
-- ENV + LFO held for two seconds toggles controller mode. Leave this mode
+- Tap OCT- + OCT+ together to toggle controller mode. Leave this mode
   to hear internal notes; browser hardware MIDI output is not emulated.
 
 See the [firmware guide](https://github.com/dspaudio/orbit/blob/main/GUIDE.md).
@@ -74,8 +97,8 @@ files and both Wasm modules there only after verification.
 ## Storage and limitations
 
 IndexedDB database `sloop-emu`, store `flash`, keeps `image-orbit` for the
-default build and `image-orbit-0.9.B` for the alternate build.
-Existing default saves are not erased or migrated.
+default build and the existing `image-orbit-0.9.B` key for 0.10.B.
+Neither build's existing saves are erased or migrated.
 USB audio, USB editor/SysEx communication, user sample upload/CHOP,
 Bluetooth and firmware installation are not implemented by the browser HAL.
 The battery reading is simulated. Event Tape edits sequencer events, not PCM.

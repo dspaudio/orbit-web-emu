@@ -7,16 +7,16 @@
  * case's top-left corner, case = 963 x 588, scaled by S. */
 'use strict';
 
-const BLE_SOUND = new URLSearchParams(location.search).get('version') === '0.9.B';
-const FIRMWARE_VERSION = BLE_SOUND ? '0.9.B' : '0.9.0';
+const BLE_SOUND = new URLSearchParams(location.search).get('version') === '0.10.B';
+const FIRMWARE_VERSION = BLE_SOUND ? '0.10.B' : '0.10.0';
 const WASM_FILE = BLE_SOUND ? 'orbit-ble.wasm' : 'orbit.wasm';
 const versionSelect = document.getElementById('firmware-version');
 versionSelect.value = FIRMWARE_VERSION;
 document.getElementById('version-label').textContent = FIRMWARE_VERSION;
-document.title = `ORBIT ${FIRMWARE_VERSION} — FM-1 emulator`;
+document.title = `ORBIT ${FIRMWARE_VERSION} - FM-1 emulator`;
 document.getElementById('version-description').textContent = BLE_SOUND
-    ? '0.9.B sound: FM melodic replacements, original drum samples, shorter delay. Bluetooth radio is not emulated.'
-    : '0.9.0 sound: original melodic and drum samples, full-length delay.';
+    ? '0.10.B sound: FM melodic replacements, original drum samples, shorter delay. Bluetooth radio is not emulated.'
+    : '0.10.0 sound: original melodic and drum samples, full-length delay.';
 versionSelect.addEventListener('change', () => {
     location.assign('?version=' + encodeURIComponent(versionSelect.value));
 });
@@ -310,9 +310,9 @@ async function saveFlash(buf) {
 async function powerOn() {
     document.getElementById('power').remove();
     ctx = new AudioContext({ sampleRate: 44100, latencyHint: 'interactive' });
-    await ctx.audioWorklet.addModule('worklet.js?v=0.9-dual');
+    await ctx.audioWorklet.addModule('worklet.js?v=0.10-dual');
     const [wasmBytes, flashImage] = await Promise.all([
-        (await fetch(WASM_FILE + '?v=0.9-dual')).arrayBuffer(),
+        (await fetch(WASM_FILE + '?v=0.10-dual')).arrayBuffer(),
         loadFlash(),
     ]);
     node = new AudioWorkletNode(ctx, 'sloop', {

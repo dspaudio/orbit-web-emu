@@ -1,7 +1,7 @@
 {
-  "name": "ORBIT 0.9 \u2014 FM-1 emulator",
+  "name": "ORBIT 0.10 - FM-1 emulator",
   "short_name": "ORBIT",
-  "description": "Compare ORBIT 0.9.0 sample sounds and 0.9.B FM replacements in the browser.",
+  "description": "Compare ORBIT 0.10.0 sample sounds and 0.10.B FM replacements in the browser.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",
