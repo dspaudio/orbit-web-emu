@@ -1,6 +1,6 @@
 # ORBIT web emulator
 
-Play and compare **ORBIT 0.10.0** and **ORBIT 0.10.B** using the actual C
+Play and compare **ORBIT 1.0.0** and **ORBIT 1.0.B** using the actual C
 firmware compiled to WebAssembly inside an AudioWorklet.
 
 **[Open the emulator](https://dspaudio.github.io/orbit-web-emu/)**
@@ -11,8 +11,8 @@ Choose **Firmware sound**, then press **POWER ON**:
 
 | Version | Module | Sound |
 | --- | --- | --- |
-| 0.10.0 | `orbit.wasm` | Original melodic samples and full-length delay |
-| 0.10.B | `orbit-ble.wasm` | FM melodic replacements and shorter delay; original PERC drums |
+| 1.0.0 | `orbit.wasm` | Original melodic samples and full-length delay |
+| 1.0.B | `orbit-ble.wasm` | FM melodic replacements and 0.37 s delay; original PERC drums |
 
 Try SAMPLE presets **GRAND PNO**, **VIBES** and **UP BASS** in both versions.
 Names and engine IDs are preserved. PIANO uses a 3-operator FM tine voice;
@@ -21,41 +21,39 @@ noise/triangle sweep. GRAIN uses the corresponding sources too.
 See the [complete replacement list](https://github.com/dspaudio/orbit#sounds-replaced-in-the-bluetooth-build).
 
 Switching version reloads the instrument and stops audio. The default build
-keeps the existing ORBIT browser save; 0.10.B keeps the separate save image
+keeps the existing ORBIT browser save; 1.0.B keeps the separate save image
 used by 0.9.B.
-Direct links use `?version=0.10.0` or `?version=0.10.B`. Older firmware names
+Direct links use `?version=1.0.0` or `?version=1.0.B`. Older firmware names
 and unknown versions cannot select SLOOP, Felucca or an old ORBIT module.
 
-This is a **sound comparison**, not a Bluetooth emulator. The 0.10.B
+This is a **sound comparison**, not a Bluetooth emulator. The 1.0.B
 firmware menu reports `FAILED: NO BROWSER RADIO` if Bluetooth is enabled.
 
-## New in 0.10
+## New in 1.0
 
-- **Quiet drum GRID editing:** white keys add or remove the selected voice's
-  hits silently, and KNOB 1/2 select the voice and step cursor silently.
-  Hits sound when the playhead reaches them. Black keys select and audition
-  voices; with REC on while playing, they also record their voice live.
-- **Controller shortcut:** tap OCT- + OCT+ together, releasing within about
-  half a second with no other button or key. On a computer, use Z + X.
-  This replaces the two-second ENV + LFO hold.
-  MENU > AUDIO > CONTROLLER still works.
-- **Hardware MIDI clock output:** GLO > SYSTEM > SYNC = OUT sends 24 pulses
-  per quarter note with START/STOP over USB MIDI, and Bluetooth MIDI in
-  0.10.B. The browser supports MIDI note input only, not MIDI output or
-  external clock sync.
-- **Hardware Bluetooth recovery:** 0.10.B can start Bluetooth using recovery
-  values when other firmware has erased the FM-1's stock radio calibration.
-  These values are not calibrated for each unit. Bluetooth and its recovery
-  path are not emulated here.
+- **Chord voicings:** OPEN (1, 5, 10), OPEN7 (1, 5, 7, 10), ADD9 and 6TH.
+  Changing chords within one arp step continues the arpeggio's pattern.
+- **Controller switches and feedback:** in controller mode, EDIT + FX / SEL /
+  ENV / LFO switches each button between momentary and toggle. Incoming CCs
+  on the controller channel update knob values and toggle indicators.
+- **Hardware phone audio:** 1.0.B receives A2DP audio, with a separate level
+  on GLO > BT AUDIO when a phone is connected. Its delay is now 0.37 s
+  (PING: 0.19 s per side). Bluetooth MIDI and A2DP are not emulated; the
+  browser's disconnected BT AUDIO page stays hidden.
 
-See the [0.10.0 release notes](https://github.com/dspaudio/orbit/blob/main/docs/releases/0.10.0.md)
-and [0.10.B release notes](https://github.com/dspaudio/orbit/blob/main/docs/releases/0.10.B.md).
+Quiet drum GRID editing, the OCT- + OCT+ controller shortcut and hardware
+MIDI clock output remain. The browser accepts MIDI channel messages but
+does not send MIDI output or follow external clock.
 
 ## Firmware and controls
 
-`ORBIT_REVISION` pins the source commit. `build-info.json` records the
+`ORBIT_REVISION` pins the clean release source commit. `build-info.json` records the
 actual compiled firmware version, source revision, dirty/development state,
 module size and SHA-256 for each build.
+
+The 1.0 modules are built from the clean ORBIT 1.0.0 / 1.0.B release commit
+recorded in `ORBIT_REVISION`. The published `build-info.json` reports
+`dirty: false` and `local_development: false`.
 
 Both run the real sequencer, synthesis engines, effects, storage readers and
 240-by-240 display. There are 17 engines and 189 factory sounds, with ORP8
@@ -89,7 +87,13 @@ python3 -m http.server 8787 --directory dist
 
 The source checkout must be clean and match `ORBIT_REVISION`.
 Explicit `ORBIT_LOCAL_DEVELOPMENT=1` allows local dirty builds and marks
-their metadata accordingly; do not deploy those artifacts.
+their metadata accordingly; do not deploy those artifacts. To test work in progress:
+
+```sh
+ORBIT=../orbit ORBIT_LOCAL_DEVELOPMENT=1 PYTHON=dist/.venv/bin/python \
+  CLANG=/opt/homebrew/opt/llvm/bin/clang sh build.sh
+```
+
 Generators use isolated directories, never the native firmware's `build/gen`.
 The deployed application lives in `docs/`; copy the generated application
 files and both Wasm modules there only after verification.
@@ -97,7 +101,7 @@ files and both Wasm modules there only after verification.
 ## Storage and limitations
 
 IndexedDB database `sloop-emu`, store `flash`, keeps `image-orbit` for the
-default build and the existing `image-orbit-0.9.B` key for 0.10.B.
+default build and the existing `image-orbit-0.9.B` key for 1.0.B.
 Neither build's existing saves are erased or migrated.
 USB audio, USB editor/SysEx communication, user sample upload/CHOP,
 Bluetooth and firmware installation are not implemented by the browser HAL.

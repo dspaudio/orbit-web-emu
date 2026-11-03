@@ -48,8 +48,8 @@ function boot(key, version) {
 }
 
 // Given fresh instances of both actual firmware variants.
-const normal = boot('orbit', '0.10.0');
-const ble = boot('orbit-ble', '0.10.B');
+const normal = boot('orbit', '1.0.0');
+const ble = boot('orbit-ble', '1.0.B');
 assert.equal(info.default_variant, 'orbit');
 assert.equal(info.variants.orbit.orbit_ble, false);
 assert.equal(info.variants['orbit-ble'].orbit_ble, true);
@@ -60,7 +60,7 @@ assert.deepEqual(normal.inventory.map(engine => engine.name), [
   'SWARM', 'PULSE', 'FM4', 'FM6', 'PHYS', 'NOISE', 'CLUSTER', 'CLOUD',
 ], 'default engine IDs remain compatible');
 assert.equal(normal.e.emu_delay_length(), 65536);
-assert.equal(ble.e.emu_delay_length(), 32768);
+assert.equal(ble.e.emu_delay_length(), 16384);
 
 // When the PERC source payload is read, its bytes must agree despite changed offsets.
 const perc = t => Buffer.from(new Uint8Array(t.e.memory.buffer, t.e.emu_perc_ptr(), t.e.emu_perc_size()));

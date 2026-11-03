@@ -20,7 +20,8 @@
 
 #if ORBIT_BLE
 #include "ble/ble_api.h"
-/* Sound-only BLE variant: no vendor SDK, RF, pairing or Bluetooth MIDI.
+#include "ble/a2dp.h"
+/* Sound-only BLE variant: no vendor SDK, RF, pairing, Bluetooth MIDI or A2DP.
  * Keep the firmware menu API honest even if the user tries to start it. */
 static uint8_t emu_radio_requested;
 void ble_user_start(void) { emu_radio_requested = 1; }
@@ -32,6 +33,11 @@ void ble_midi_out_pkt(uint32_t pkt) { (void)pkt; }
 int ble_midi_take(uint32_t *pkt) { (void)pkt; return 0; }
 uint32_t ble_midi_rx_drops(void) { return 0; }
 uint32_t ble_midi_tx_drops(void) { return 0; }
+int a2dp_link(void) { return 0; }
+void a2dp_mix(int32_t *left, int32_t *right, uint32_t frames, int32_t gain_q7)
+{
+    (void)left; (void)right; (void)frames; (void)gain_q7;
+}
 #endif
 
 /* ------------------------------------------------------------- time HAL --- */
@@ -349,6 +355,9 @@ WASM_EXPORT("emu_frame") void emu_frame(void)   /* the main loop's UI pass */
     {   /* master volume as the pot in fm1_main */
         uint32_t k10 = (uint32_t)fm1_adc_read(FM1_ADC_MASTER);
         song.master_q12 = (k10 * k10) >> 8;
+#if ORBIT_BLE
+        master_k10 = (uint16_t)k10;
+#endif
     }
     {   /* battery: a steady healthy reading */
         int32_t b = fm1_adc_read(FM1_ADC_BATT);

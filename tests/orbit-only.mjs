@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 const source = fs.readFileSync(new URL('../web/emu.js', import.meta.url), 'utf8');
 const html = fs.readFileSync(new URL('../web/index.html', import.meta.url), 'utf8');
 assert.deepEqual([...html.matchAll(/<option value="([^"]+)"/g)].map(m => m[1]),
-    ['0.10.0', '0.10.B'], 'Only the current sound builds are selectable');
+    ['1.0.0', '1.0.B'], 'Only the current sound builds are selectable');
 
 class Element {
     constructor() {
@@ -25,9 +25,9 @@ class Element {
 
 for (const stored of ['sloop', 'felucca', 'orbit', null]) {
     for (const search of ['', '?fw=sloop', '?fw=felucca', '?fw=orbit',
-        '?version=0.10.0', '?version=0.10.B', '?version=0.8.2', '?fw=sloop&version=0.10.B',
-        '?version=0.9.0', '?version=0.9.B', '?version=unknown']) {
-        const ble = new URLSearchParams(search).get('version') === '0.10.B';
+        '?version=1.0.0', '?version=1.0.B', '?version=0.8.2', '?fw=sloop&version=1.0.B',
+        '?version=0.9.0', '?version=0.9.B', '?version=0.10.0', '?version=0.10.B', '?version=unknown']) {
+        const ble = new URLSearchParams(search).get('version') === '1.0.B';
         const flashKey = ble ? 'image-orbit-0.9.B' : 'image-orbit';
         const wasmFile = ble ? 'orbit-ble.wasm' : 'orbit.wasm';
         // Given a legacy URL/preference and distinct saved flash images.
@@ -147,7 +147,7 @@ for (const stored of ['sloop', 'felucca', 'orbit', null]) {
         let prevented = false;
         window.events.get('keydown')({ target: selector, key: 'ArrowDown', preventDefault: () => { prevented = true; } });
         assert.equal(prevented, false, 'Version selector retains native keyboard navigation');
-        selector.value = ble ? '0.10.0' : '0.10.B';
+        selector.value = ble ? '1.0.0' : '1.0.B';
         selector.events.get('change')();
         assert.equal(navigated, '?version=' + selector.value);
         // Given a compact viewport, the instrument must leave the selector's top strip free.
@@ -158,4 +158,4 @@ for (const stored of ['sloop', 'felucca', 'orbit', null]) {
             'Compact instrument is centered below the 64px version selector');
     }
 }
-console.log('ORBIT variants frontend: PASS (44 URL/preference combinations, power gate, isolated saves, keyboard selection)');
+console.log('ORBIT variants frontend: PASS (52 URL/preference combinations, power gate, isolated saves, keyboard selection)');
