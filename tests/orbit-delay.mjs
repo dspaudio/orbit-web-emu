@@ -4,7 +4,7 @@
 // of the real output compared: PING must put the echoes to the sides, MONO keeps them in the middle.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-const mod = new WebAssembly.Module(fs.readFileSync('dist/orbit.wasm'));
+const mod = new WebAssembly.Module(fs.readFileSync('dist/orbit-ble.wasm'));
 function run(type) {
   const e = new WebAssembly.Instance(mod, {}).exports;
   const frame = () => new Uint16Array(e.memory.buffer, e.emu_fb_ptr(), 240 * 240).slice();

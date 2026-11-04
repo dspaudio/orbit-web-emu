@@ -1,7 +1,7 @@
 {
-  "name": "ORBIT 1.0 - FM-1 emulator",
+  "name": "ORBIT 1.0.1B - FM-1 emulator",
   "short_name": "ORBIT",
-  "description": "Compare ORBIT 1.0.0 sample sounds and 1.0.B FM replacements in the browser.",
+  "description": "Play ORBIT 1.0.1B, the FM-1 Bluetooth sound build, in the browser.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",

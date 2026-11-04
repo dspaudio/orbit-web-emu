@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-const path = process.argv[2] || 'dist/orbit.wasm';
+const path = process.argv[2] || 'dist/orbit-ble.wasm';
 const mod = new WebAssembly.Module(fs.readFileSync(path));
 assert.equal(WebAssembly.Module.imports(mod).length, 0, 'module is self-contained');
 function boot(flash) {

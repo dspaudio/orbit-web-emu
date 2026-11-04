@@ -1,6 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: GPL-3.0-only
-# Compile both ORBIT sound variants using the browser HAL, without a radio stack.
+# Compile the ORBIT Bluetooth build (ORBIT_BLE=1) using the browser HAL, without a radio stack.
 set -eu
 cd "$(dirname "$0")"
 ORBIT=${ORBIT:-../orbit}
@@ -25,9 +25,9 @@ if sys.argv[2] != '1' and (dirty or revision != published):
     raise SystemExit('Release build requires clean sources matching ORBIT_REVISION; use ORBIT_LOCAL_DEVELOPMENT=1 explicitly for local development')
 PY
 mkdir -p build dist
-run=$(mktemp -d "$PWD/build/dual.XXXXXX")
+run=$(mktemp -d "$PWD/build/ble.XXXXXX")
 trap 'rm -rf "$run"' EXIT HUP INT TERM
-for variant in orbit orbit-ble; do
+for variant in orbit-ble; do
     ble=0
     [ "$variant" != orbit-ble ] || ble=1
     root="$run/$variant"
@@ -58,19 +58,19 @@ revision=subprocess.check_output(['git','-C',str(p),'rev-parse','HEAD'],text=Tru
 published=pathlib.Path('ORBIT_REVISION').read_text().strip()
 dirty=bool(subprocess.check_output(['git','-C',str(p),'status','--porcelain','--untracked-files=all'],text=True))
 variants={}
-for key,ble in [('orbit',False),('orbit-ble',True)]:
+for key,ble in [('orbit-ble',True)]:
     data=(pathlib.Path(sys.argv[3])/(key+'.wasm')).read_bytes()
     macros=(pathlib.Path(sys.argv[3])/(key+'.macros')).read_text()
     firmware=json.loads(re.search(r'^#define FELUCCA_VERSION (".*?")',macros,re.M)[1])
     variants[key]={'firmware':firmware,'version':firmware.removeprefix('ORBIT '),'file':key+'.wasm',
                    'orbit_ble':ble,'radio_emulated':False,'sha256':hashlib.sha256(data).hexdigest(),
                    'bytes':len(data)}
-info={'firmware':variants['orbit']['firmware'],'source':'https://github.com/dspaudio/orbit',
+info={'firmware':variants['orbit-ble']['firmware'],'source':'https://github.com/dspaudio/orbit',
       'source_checkout_commit':revision,'published_source_commit':published,
-      'dirty':dirty,'local_development':sys.argv[2]=='1','default_variant':'orbit','variants':variants}
+      'dirty':dirty,'local_development':sys.argv[2]=='1','default_variant':'orbit-ble','variants':variants}
 (pathlib.Path(sys.argv[3])/'build-info.json').write_text(json.dumps(info,indent=2)+'\n')
 PY
-cp "$run/orbit.wasm" "$run/orbit-ble.wasm" "$run/build-info.json" dist/
+cp "$run/orbit-ble.wasm" "$run/build-info.json" dist/
 cp web/index.html web/emu.js web/worklet.js web/manifest.webmanifest \
    web/icon-192.png web/icon-512.png web/apple-touch-icon.png dist/
-ls -lh dist/orbit.wasm dist/orbit-ble.wasm
+ls -lh dist/orbit-ble.wasm

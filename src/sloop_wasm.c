@@ -34,6 +34,7 @@ int ble_midi_take(uint32_t *pkt) { (void)pkt; return 0; }
 uint32_t ble_midi_rx_drops(void) { return 0; }
 uint32_t ble_midi_tx_drops(void) { return 0; }
 int a2dp_link(void) { return 0; }
+int a2dp_streaming(void) { return 0; }   /* (1.0.1B) no phone stream: BT BUFFER saves and UI pacing see none */
 void a2dp_mix(int32_t *left, int32_t *right, uint32_t frames, int32_t gain_q7)
 {
     (void)left; (void)right; (void)frames; (void)gain_q7;
@@ -458,6 +459,13 @@ WASM_EXPORT("emu_radio_status") const char *emu_radio_status(void)
     return "UNAVAILABLE";
 #endif
 }
+#if ORBIT_BLE
+/* (1.0.1B) the GLO > BT BUFFER device setting as shown, "46", "58" or "70" ms (params.c N_BTBUF). */
+WASM_EXPORT("emu_bt_buffer_ms") const char *emu_bt_buffer_ms(void)
+{
+    return bt_buffer_setting >= 0 && bt_buffer_setting < (int16_t)NELEM(N_BTBUF) ? N_BTBUF[bt_buffer_setting] : "";
+}
+#endif
 /* PERC is the final built-in set; compare its ADPCM payload, not effects output. */
 WASM_EXPORT("emu_perc_ptr") const uint8_t *emu_perc_ptr(void)
 {

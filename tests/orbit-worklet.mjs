@@ -9,7 +9,7 @@ vm.runInNewContext(fs.readFileSync('web/worklet.js', 'utf8'), {
   AudioWorkletProcessor, WebAssembly, Float32Array, Uint8Array, Uint16Array,
   registerProcessor: (name, implementation) => { Processor = implementation; },
 });
-const p = new Processor({processorOptions:{wasmBytes:fs.readFileSync('dist/orbit.wasm')}});
+const p = new Processor({processorOptions:{wasmBytes:fs.readFileSync('dist/orbit-ble.wasm')}});
 const send = data => p.port.onmessage({data});
 const screen = () => Buffer.from(new Uint8Array(p.e.memory.buffer,p.e.emu_fb_ptr(),240*240*2));
 const pump = n => { for(let i=0;i<n;i++) { const out=[[new Float32Array(128),new Float32Array(128)]]; assert(p.process([],out)); for(const ch of out[0]) assert(ch.every(Number.isFinite)); } };

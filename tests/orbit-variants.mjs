@@ -1,4 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// The published module is the ORBIT 1.0.1B Bluetooth build (ORBIT_BLE=1): build-info.json describes
+// exactly that module, the real wasm reports the version, keeps the engine and preset inventory, the
+// 0.37 s delay and a real PERC payload, plays every engine and the FM-replaced melodic SAMPLE presets,
+// keeps the Bluetooth menu honest without a browser radio, and edits the new GLO > BT BUFFER setting.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
@@ -47,25 +51,22 @@ function boot(key, version) {
   return {e, text, pump, select, inventory};
 }
 
-// Given fresh instances of both actual firmware variants.
-const normal = boot('orbit', '1.0.0');
-const ble = boot('orbit-ble', '1.0.B');
-assert.equal(info.default_variant, 'orbit');
-assert.equal(info.variants.orbit.orbit_ble, false);
+// Given the single published build and a fresh instance of its actual firmware.
+assert.deepEqual(Object.keys(info.variants), ['orbit-ble'], 'only the Bluetooth build is published');
+assert.equal(info.default_variant, 'orbit-ble');
+assert.equal(info.firmware, 'ORBIT 1.0.1B');
 assert.equal(info.variants['orbit-ble'].orbit_ble, true);
 assert.equal(typeof info.dirty, 'boolean');
-assert.deepEqual(normal.inventory, ble.inventory, 'append-only engine IDs and every preset name/index survive');
-assert.deepEqual(normal.inventory.map(engine => engine.name), [
+const ble = boot('orbit-ble', '1.0.1B');
+assert.deepEqual(ble.inventory.map(engine => engine.name), [
   'ANALOG', 'DIGITAL', 'PHASE', 'LOFI', 'SAMPLE', 'VOICE', 'TRIO', 'WHEEL', 'GRAIN',
   'SWARM', 'PULSE', 'FM4', 'FM6', 'PHYS', 'NOISE', 'CLUSTER', 'CLOUD',
-], 'default engine IDs remain compatible');
-assert.equal(normal.e.emu_delay_length(), 65536);
-assert.equal(ble.e.emu_delay_length(), 16384);
+], 'engine IDs remain compatible');
+assert.equal(ble.e.emu_delay_length(), 16384, 'the Bluetooth build keeps its 0.37 s delay');
 
-// When the PERC source payload is read, its bytes must agree despite changed offsets.
+// When the PERC source payload is read, it is still real ADPCM data.
 const perc = t => Buffer.from(new Uint8Array(t.e.memory.buffer, t.e.emu_perc_ptr(), t.e.emu_perc_size()));
-assert(perc(normal).length > 1000, 'PERC remains real ADPCM');
-assert.deepEqual(perc(normal), perc(ble), 'PERC source bytes are identical');
+assert(perc(ble).length > 1000, 'PERC remains real ADPCM');
 
 function play(t, engine, preset) {
   t.select(engine, preset);
@@ -76,29 +77,25 @@ function play(t, engine, preset) {
   return Buffer.from(pcm.buffer);
 }
 
-// When real panel keys play each engine, both builds produce finite, nonzero audio.
+// When real panel keys play each engine, the build produces finite, nonzero audio.
 const rendered = [];
-for (const engine of normal.inventory) {
+for (const engine of ble.inventory) {
   if (!engine.presets.length) continue;
-  const a = play(normal, engine.id, 0);
-  const b = play(ble, engine.id, 0);
-  rendered.push({engine: engine.name, normal: hash(a), ble: hash(b)});
+  rendered.push({engine: engine.name, sha256: hash(play(ble, engine.id, 0))});
 }
 
-// Then every same-named melodic SAMPLE preset has a distinct real PCM render.
-const sample = normal.inventory.find(engine => engine.name === 'SAMPLE');
+// Then every FM-replaced melodic SAMPLE preset keeps its name and index and plays.
+const sample = ble.inventory.find(engine => engine.name === 'SAMPLE');
 assert(sample, 'SAMPLE engine remains available');
 const melodic = ['GRAND PNO', 'UP BASS', 'VIBES', 'HORN STAB', 'STRING STB', 'LOFI FLUTE', 'SCRATCH',
   'DUSTY PNO', 'LOFI KEYS', 'DEEP BASS'];
 for (const name of melodic) {
   const preset = sample.presets.indexOf(name);
   assert(preset >= 0, `${name} retains its preset`);
-  assert.notDeepEqual(play(normal, sample.id, preset), play(ble, sample.id, preset),
-    `${name} uses the variant's actual firmware sound`);
+  play(ble, sample.id, preset);
 }
 
 // When the real Bluetooth menu is enabled, unavailable hardware never appears connected.
-assert.equal(normal.text(normal.e.emu_radio_status()), 'UNAVAILABLE');
 assert.equal(ble.text(ble.e.emu_radio_status()), 'OFF');
 ble.e.emu_input(0, 1 << 8); ble.pump(900);
 ble.e.emu_input(0, 0); ble.pump(12);
@@ -107,5 +104,18 @@ ble.e.emu_enc(4, 1); ble.pump(12); // SYSTEM, third row: BLUETOOTH.
 assert.equal(ble.text(ble.e.emu_radio_status()), 'FAILED: NO BROWSER RADIO');
 ble.e.emu_enc(4, -1); ble.pump(12);
 assert.equal(ble.text(ble.e.emu_radio_status()), 'OFF');
-console.log(JSON.stringify({result: 'PASS', engines: rendered, melodicVariants: melodic.length,
-  percBytes: perc(normal).length, percSha256: hash(perc(normal)), dirty: info.dirty}));
+
+// Then (1.0.1B) GLO twice from Tape opens the global pages, and SELECT reaches BT BUFFER after GLOBAL, MASTER
+// and SYSTEM, where KNOB1 steps the real device setting 58 -> 70 -> 46 ms.
+const fresh = boot('orbit-ble', '1.0.1B');
+assert.equal(fresh.text(fresh.e.emu_bt_buffer_ms()), '58', 'the default phone-audio prebuffer');
+const button = id => { fresh.e.emu_input(0, 1 << id); fresh.pump(12); fresh.e.emu_input(0, 0); fresh.pump(12); };
+button(7); button(7); // GLO: Mixer, then the global pages
+for (let page = 0; page < 3; page++) { fresh.e.emu_enc(0, 1); fresh.pump(12); }
+fresh.e.emu_enc(2, 1); fresh.pump(12);
+assert.equal(fresh.text(fresh.e.emu_bt_buffer_ms()), '70');
+fresh.e.emu_enc(2, -2); fresh.pump(12);
+assert.equal(fresh.text(fresh.e.emu_bt_buffer_ms()), '46');
+console.log(JSON.stringify({result: 'PASS', firmware: info.firmware, engines: rendered, melodicPresets: melodic.length,
+  percBytes: perc(ble).length, percSha256: hash(perc(ble)), btBufferMs: fresh.text(fresh.e.emu_bt_buffer_ms()),
+  dirty: info.dirty, localDevelopment: info.local_development}));

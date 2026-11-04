@@ -1,29 +1,20 @@
 {
-  "firmware": "ORBIT 1.0.0",
+  "firmware": "ORBIT 1.0.1B",
   "source": "https://github.com/dspaudio/orbit",
-  "source_checkout_commit": "81e4df5eae55d7a1a53348802079833a97dbe74b",
-  "published_source_commit": "81e4df5eae55d7a1a53348802079833a97dbe74b",
+  "source_checkout_commit": "1dbb77d61236d77ef363af1f4c8620e0c2996480",
+  "published_source_commit": "1dbb77d61236d77ef363af1f4c8620e0c2996480",
   "dirty": false,
   "local_development": false,
-  "default_variant": "orbit",
+  "default_variant": "orbit-ble",
   "variants": {
-    "orbit": {
-      "firmware": "ORBIT 1.0.0",
-      "version": "1.0.0",
-      "file": "orbit.wasm",
-      "orbit_ble": false,
-      "radio_emulated": false,
-      "sha256": "c465350cf23b588d9b25545d23c10d0e3438946b3c2b21fa91a0ea72dc835902",
-      "bytes": 1154003
-    },
     "orbit-ble": {
-      "firmware": "ORBIT 1.0.B",
-      "version": "1.0.B",
+      "firmware": "ORBIT 1.0.1B",
+      "version": "1.0.1B",
       "file": "orbit-ble.wasm",
       "orbit_ble": true,
       "radio_emulated": false,
-      "sha256": "41f6f574abd62ef0e06142be1aaf678ffae9f4154668e3b1a1f2877fad57d240",
-      "bytes": 891146
+      "sha256": "f69c4fe1327fc5d518936e43c9cf2529712dc9cd11e0c28c0d56b668f7f6d52f",
+      "bytes": 893866
     }
   }
 }

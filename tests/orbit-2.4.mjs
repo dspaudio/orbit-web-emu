@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-const mod = new WebAssembly.Module(fs.readFileSync('dist/orbit.wasm'));
+const mod = new WebAssembly.Module(fs.readFileSync('dist/orbit-ble.wasm'));
 function boot(flash) {
   const e = new WebAssembly.Instance(mod, {}).exports;
   if (flash) new Uint8Array(e.memory.buffer, e.emu_flash_ptr(), e.emu_flash_size()).set(flash);

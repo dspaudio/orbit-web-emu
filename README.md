@@ -1,61 +1,54 @@
 # ORBIT web emulator
 
-Play and compare **ORBIT 1.0.0** and **ORBIT 1.0.B** using the actual C
-firmware compiled to WebAssembly inside an AudioWorklet.
+Play **ORBIT 1.0.1B**, the FM-1 Bluetooth build, using the actual C firmware
+compiled to WebAssembly inside an AudioWorklet.
 
 **[Open the emulator](https://dspaudio.github.io/orbit-web-emu/)**
 
-## Compare the sound builds
+## The firmware
 
-Choose **Firmware sound**, then press **POWER ON**:
-
-| Version | Module | Sound |
-| --- | --- | --- |
-| 1.0.0 | `orbit.wasm` | Original melodic samples and full-length delay |
-| 1.0.B | `orbit-ble.wasm` | FM melodic replacements and 0.37 s delay; original PERC drums |
-
-Try SAMPLE presets **GRAND PNO**, **VIBES** and **UP BASS** in both versions.
+The emulator runs one module, `orbit-ble.wasm`: ORBIT 1.0.1B compiled with
+`ORBIT_BLE=1` from the same sources as the `orbit-ble.fwsc` hardware image.
+It has the Bluetooth build's sound: FM melodic replacements for the built-in
+samples, the original PERC drums and a 0.37 s delay (PING: 0.19 s per side).
 Names and engine IDs are preserved. PIANO uses a 3-operator FM tine voice;
 BASS, VIBES, HORNS, STRGS and FLUTE use 2-operator FM; SCRCH uses a
 noise/triangle sweep. GRAIN uses the corresponding sources too.
 See the [complete replacement list](https://github.com/dspaudio/orbit#sounds-replaced-in-the-bluetooth-build).
 
-Switching version reloads the instrument and stops audio. The default build
-keeps the existing ORBIT browser save; 1.0.B keeps the separate save image
-used by 0.9.B.
-Direct links use `?version=1.0.0` or `?version=1.0.B`. Older firmware names
-and unknown versions cannot select SLOOP, Felucca or an old ORBIT module.
+There is no version selector. Older `?version=` links and stored firmware
+preferences all open 1.0.1B; SLOOP, Felucca, the sample-based 1.0.0 and
+earlier ORBIT modules are not published.
 
-This is a **sound comparison**, not a Bluetooth emulator. The 1.0.B
-firmware menu reports `FAILED: NO BROWSER RADIO` if Bluetooth is enabled.
+This is a **sound emulator**, not a Bluetooth emulator. Enabling Bluetooth in
+the firmware menu reports `FAILED: NO BROWSER RADIO`.
 
-## New in 1.0
+## New in 1.0.1B
 
-- **Chord voicings:** OPEN (1, 5, 10), OPEN7 (1, 5, 7, 10), ADD9 and 6TH.
-  Changing chords within one arp step continues the arpeggio's pattern.
-- **Controller switches and feedback:** in controller mode, EDIT + FX / SEL /
-  ENV / LFO switches each button between momentary and toggle. Incoming CCs
-  on the controller channel update knob values and toggle indicators.
-- **Hardware phone audio:** 1.0.B receives A2DP audio, with a separate level
-  on GLO > BT AUDIO when a phone is connected. Its delay is now 0.37 s
-  (PING: 0.19 s per side). Bluetooth MIDI and A2DP are not emulated; the
-  browser's disconnected BT AUDIO page stays hidden.
+- **GLO > BT BUFFER:** on hardware, KNOB1 chooses 46, 58 or 70 ms of
+  phone-audio prebuffer (default 58 ms; larger values add latency). It is a
+  device setting, independent of projects. The browser shows and edits the
+  page, but has no phone stream to buffer, and the device store that keeps
+  the setting is written only by the hardware main loop.
 
-Quiet drum GRID editing, the OCT- + OCT+ controller shortcut and hardware
-MIDI clock output remain. The browser accepts MIDI channel messages but
-does not send MIDI output or follow external clock.
+The 1.0 features remain: chord voicings OPEN, OPEN7, ADD9 and 6TH with arp
+continuity, controller-mode momentary/toggle switches with CC feedback, quiet
+drum GRID editing, the OCT- + OCT+ controller shortcut and hardware MIDI clock
+output over USB and Bluetooth MIDI. The browser accepts MIDI channel messages
+but does not send MIDI output or follow external clock. Bluetooth MIDI and
+A2DP are not emulated; the disconnected BT AUDIO page stays hidden.
 
 ## Firmware and controls
 
 `ORBIT_REVISION` pins the clean release source commit. `build-info.json` records the
 actual compiled firmware version, source revision, dirty/development state,
-module size and SHA-256 for each build.
+module size and SHA-256 of the build.
 
-The 1.0 modules are built from the clean ORBIT 1.0.0 / 1.0.B release commit
+The published module is built from the clean ORBIT 1.0.1B release commit
 recorded in `ORBIT_REVISION`. The published `build-info.json` reports
 `dirty: false` and `local_development: false`.
 
-Both run the real sequencer, synthesis engines, effects, storage readers and
+It runs the real sequencer, synthesis engines, effects, storage readers and
 240-by-240 display. There are 17 engines and 189 factory sounds, with ORP8
 projects and OPB3 USER banks. Optional SLICE is disabled.
 
@@ -81,7 +74,6 @@ for test in orbit-variants orbit-wasm orbit-worklet orbit-engines orbit-lfo \
   orbit-2.4 orbit-refresh orbit-only orbit-delay; do
   node "tests/$test.mjs"
 done
-node tests/orbit-wasm.mjs dist/orbit-ble.wasm
 python3 -m http.server 8787 --directory dist
 ```
 
@@ -96,21 +88,23 @@ ORBIT=../orbit ORBIT_LOCAL_DEVELOPMENT=1 PYTHON=dist/.venv/bin/python \
 
 Generators use isolated directories, never the native firmware's `build/gen`.
 The deployed application lives in `docs/`; copy the generated application
-files and both Wasm modules there only after verification.
+files and the Wasm module there only after verification.
 
 ## Storage and limitations
 
-IndexedDB database `sloop-emu`, store `flash`, keeps `image-orbit` for the
-default build and the existing `image-orbit-0.9.B` key for 1.0.B.
-Neither build's existing saves are erased or migrated.
+IndexedDB database `sloop-emu`, store `flash`, keeps the Bluetooth build's
+image under the existing `image-orbit-0.9.B` key, so 0.9.B and 1.0.B browser
+saves carry over to 1.0.1B, which changes no storage format. The sample
+builds' `image-orbit` key is neither read, erased nor migrated.
 USB audio, USB editor/SysEx communication, user sample upload/CHOP,
 Bluetooth and firmware installation are not implemented by the browser HAL.
 The battery reading is simulated. Event Tape edits sequencer events, not PCM.
 Avoid hardware calibration, which waits for a physical matrix.
 
-Tests cover actual Wasm boot, PCM, panel input, persistence, matching preset
-inventories, distinct melodic output and byte-identical PERC data.
-They do not prove FM-1 timing, radio load, stack usage or power-loss recovery.
+Tests cover actual Wasm boot, PCM, panel input, persistence, the preset
+inventory, audible melodic presets, real PERC data, the honest Bluetooth
+menu and the BT BUFFER setting. They do not prove FM-1 timing, radio load,
+stack usage or power-loss recovery.
 
 ## Origin and licensing
 
